@@ -428,3 +428,456 @@ The entire backend architecture process can be compared to a high-end restaurant
 - **The Request Context** is the slip of paper attached to the order that follows the food through every station, detailing the table number (Request ID) and customer allergies or preferences (User Permissions).
 - **The Service Layer** is the Chef. They manage the overall preparation, combining ingredients, and ensuring the dishes are cooked properly (Core Logic/Orchestration).
 - **The Repository Layer** is the Pantry/Supply Manager. They are responsible only for fetching specific, raw ingredients or storing them safely (Database Interaction), exactly as requested by the Chef.
+---
+
+## Complete REST API Design Notes
+
+### I. Introduction and Context
+
+API design is a critical aspect of backend engineering. This discussion focuses on **REST APIs (Representational State Transfer)**, one of the most widely used API standards.
+
+- **Goal of Standardization:** Sticking to existing REST standards and guidelines helps backend engineers avoid common confusions (e.g., using PUT vs. PATCH, choosing status codes) and allows them to focus primarily on **business logic**.
+- **Historical Foundation:** The World Wide Web project was started by Tim Berners-Lee in 1990 to facilitate global knowledge sharing. He invented crucial technologies like **URI**, **HTTP**, and **HTML**.
+- **The Scalability Crisis:** The project faced a breakdown due to the exponential growth of its user base.
+### II. REST Architectural Constraints (Roy Fielding’s Contribution)
+
+Around 1993, Roy Fielding proposed several constraints to address web scalability, which later formed the basis of the REST architectural style, named in his 2000 PhD dissertation.
+
+1. **Client-Server:** Emphasizes the **separation of concerns** where the client handles the user interface and the server manages data storage and business logic, allowing components to evolve independently and improving scalability.
+2. **Uniform Interface:** Simplifies the overall system architecture by establishing a standardized way for components to communicate. It includes four sub-constraints: Resource Identification, Resource Manipulation through Representation, Self-Descriptive Messages, and HATEOAS (Hypermedia as the Engine of Application State).
+3. **Layered System:** The architecture is composed of hierarchical layers, and each layer only interacts with the immediate layer below it. This enables better scalability, security, and the addition of intermediate components like load balancers and proxy servers.
+4. **Cache:** Server responses must be **explicitly labeled** as cacheable or non-cacheable so clients can cache responses, which reduces server load, improves network efficiency, and enhances user experience.
+5. **Stateless:** Each client request must contain **all information necessary** for the server to understand and process it. The server does not store client context between requests, improving reliability and scalability, as any server can handle the traffic.
+6. **Code on Demand (Optional):** Servers can temporarily extend client functionality by transferring executable code (like JavaScript).
+
+### III. Understanding Representational State Transfer (REST)
+
+The acronym REST defines the style of the web's architecture:
+
+- **Representational:** Resources (data/objects) are presented in a specific format, such as **JSON** (most popular), XML, or HTML. The same resource (e.g., a user object) can have different representations depending on the client (e.g., JSON for an API, HTML for a browser).
+- **State:** Refers to the current condition or attributes of a resource (e.g., the items and total price in a shopping cart).
+- **Transfer:** Indicates the movement of these resource representations between the client and server using common HTTP methods.
+
+### IV. Designing Resources and Routes
+
+Backend API design starts by defining the resources and creating intuitive routes.
+
+#### 1. Identifying Resources
+
+- Start by analyzing UI designs (wireframes/Figma) to understand how end users interact with data.
+- Resources are typically the **nouns** identified from the business requirements (e.g., Projects, Users, Organizations, Tasks).
+
+#### 2. Route Structure and Naming
+
+- **URL Standard:** API URLs often include versioning (e.g., `/v1`).
+- **Resource Naming (The Plural Rule):** All resources in the path segment of the URL **must always be in the plural form**. This applies even when fetching, updating, or deleting a single resource (e.g., `/books/123` not `/book/123`).
+- **Readability:** Avoid spaces or underscores in URLs. If phrases contain spaces, use hyphens (`-`) to create a readable slug (e.g., `harry-potter`).
+- **Hierarchical Paths:** The forward slash (`/`) indicates a hierarchical relationship between resources (e.g., `/organizations/:org_ID/projects/:proj_ID`). Each segment corresponds to a specific resource or collection.
+### V. HTTP Methods and Idempotency
+
+**Idempotency** means performing the same action multiple times yields the same final result as performing it once.
+
+| Method                   | Purpose                                                           | Idempotent Status  | Explanation                                                                                                                                                                 |
+| :----------------------- | :---------------------------------------------------------------- | :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **GET**                  | Retrieve data (Fetch)                                             | **Idempotent**     | Does not cause side effects on the server.                                                                                                                                  |
+| **PUT**                  | Completely replace the resource                                   | **Idempotent**     | Repeated execution with the same payload results in the same resource state. Developers often use PUT and PATCH interchangeably, but PUT strictly implies full replacement. |
+| **PATCH**                | Partially update a resource                                       | **Idempotent**     | Repeated execution updating a field to the same value results in the same resource state.                                                                                   |
+| **DELETE**               | Delete a resource                                                 | **Idempotent**     | The resource remains deleted after the first call; subsequent calls return the same result (e.g., 404 error) and cause no further change in state.                          |
+| **POST**                 | Create a new resource                                             | **Non-Idempotent** | Each execution creates a new entity (usually with a different ID), changing the server state.                                                                               |
+| **POST (Custom Action)** | Used for actions not fitting CRUD (e.g., "send email," "archive") | **Non-Idempotent** | POST is open-ended and used for custom actions when other methods are inappropriate.                                                                                        |
+
+### VI. List API Features (Pagination, Sorting, Filtering)
+
+List APIs (GET requests returning a collection of resources) require mechanisms to manage large data sets efficiently.
+
+#### 1. Pagination
+
+- **Purpose:** Only returns a **portion** of the data in the response, preventing performance issues associated with serializing/deserializing large payloads.
+- **Client Control:** Handled via URL query parameters:
+    - **`limit`**: Defines the number of resources returned per page.
+    - **`page`**: Defines which portion of the data is requested.
+- **Server Defaults:** If the client omits these parameters, the server should apply **sane defaults** (e.g., `page=1`, `limit=10` or `20`).
+- **Response Structure:** A paginated response should include:
+    - `data`: The array of resources.
+    - `total`: The total count of all resources in the database.
+    - `page`: The current page number being returned.
+    - `total_pages`: The total number of pages available.
+
+#### 2. Sorting
+
+- **Parameters:** Sorting is controlled via query parameters `sort_by` (the field name) and `sort_order` (ascending/descending).
+- **Default Sort:** The server must implement a default sort (e.g., by `created_at` in **descending** order) to ensure the returned data is consistent across API calls, even if the client sends no sort parameters.
+
+#### 3. Filtering
+
+- Allows the client to narrow the list using query parameters based on specific field values (e.g., `status=active` or `name=Org4`).
+
+### VII. Status Codes and Error Responses
+
+Choosing the correct HTTP status code is essential for communicating the result of the API call to the client.
+
+|Status Code|Usage Context|Explanation|
+|:--|:--|:--|
+|**200 OK**|Successful GET (List or Single), PATCH/PUT, and Custom Action (POST)|General successful response.|
+|**201 Created**|Successful POST (Creation)|Used when a **new resource is successfully created**. The response body should contain the newly created entity.|
+|**204 No Content**|Successful DELETE|Used for successful operations where the server has **no content** to return to the client (typically used for delete operations).|
+|**404 Not Found**|Client Error (Specific Entity)|Used when the client requests a **particular entity** (e.g., an organization ID) that does not exist in the server. **Never use 404 for list APIs**; if a list API returns no data, return `200 OK` with an empty array.|
+
+### VIII. General API Design Best Practices
+
+- **Design First:** Backend engineers should dedicate a separate session to **designing the API interface** using tools like Insomnia or Postman before jumping into coding. An API is designed, not coded, in the initial phase.
+- **Intuitive and Consistent Interface:** Maintain a single pattern for routes, JSON payloads, and dynamic parameters across all resources to reduce guess work and errors for integrating engineers.
+- **JSON Naming:** Always follow the **camel case** standard for JSON fields.
+- **Avoid Abbreviations:** Use full, readable field names (e.g., `description` not `DSC`) to prevent confusion for consumers who lack context.
+- **Sane Defaults (Post Calls):** For creation (POST) operations, provide safe default values for fields that are not strictly necessary but are expected by the server (e.g., default `status` to `active` if the client doesn't send it).
+- **Interactive Documentation:** Provide interactive documentation tools (like Swagger/OpenAPI) for consumers to test and understand the API behavior, minimizing communication overhead and errors.
+--------------------------------------------------------------------------------
+
+Detailed Notes: Mastering Databases with Postgres
+
+I. Database Fundamentals and Persistence
+
+A. Why Databases?
+
+The core purpose of a database is to **persist information across different sessions**. Persistence means storing data in a way that survives even after the program that created it has been stopped (e.g., a to-do list app retaining tasks after being closed). Without persistence, users would lose all progress every time they opened an application.
+
+B. Definition of a Database
+
+The term "database" is broadly defined as **any kind of persistent, structured storage**.
+
+• **Broad Examples:** A smartphone contact list, web browser local storage, session storage, cookie storage, or even a simple text file used to jot down notes.
+
+• **Backend Context:** In the typical developer context of backend systems and servers, "database" refers specifically to **disk-based databases**.
+
+II. Storage and DBMS
+
+A. Disk-Based vs. RAM-Based Storage
+
+Databases used in backend systems are primarily disk-based storage (HDD, SSDs).
+
+|              |                                                    |                                                                               |
+| ------------ | -------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Feature      | Primary Memory (RAM)                               | Secondary Memory (Disk-Based)                                                 |
+| **Cost**     | Relatively costly                                  | Relatively cheap                                                              |
+| **Capacity** | Limited (e.g., 8 GB – 128 GB)                      | High (e.g., 512 GB – 2 TB)                                                    |
+| **Speed**    | Very fast for retrieval/saving                     | Relatively slow                                                               |
+| **Use Case** | Caching mechanisms (e.g., Redis, in-memory caches) | Traditional relational and non-relational databases (e.g., Postgres, MongoDB) |
+
+The trade-off favors disk-based storage for databases because **more space is needed** at the cost of less speed.
+
+B. Database Management Systems (DBMS)
+
+A DBMS is software whose sole responsibility is to **efficiently store the data and provide CRUD operations** (Create, Read, Update, Delete) to clients.
+
+**DBMS Responsibilities:**
+
+1. **Data Organization:** Organizing data efficiently for fast fetching, updating, and creating operations.
+
+2. **Access:** Providing methods to perform CRUD operations.
+
+3. **Integrity:** Maintaining the **accuracy, validity, and consistency** of the data (e.g., ensuring a payment field only accepts numbers, not strings).
+
+4. **Security:** Protecting data from unauthorized access, managed through users, roles, etc..
+
+C. Limitations of Simple Text Files
+
+Storing data in plain text files is inefficient and leads to challenges, necessitating DBMS software:
+
+• **Parsing:** Writing application code to parse, split, and compare lines in a text file is **slow and error-prone**.
+
+• **No Structure:** Text files lack a formal structure, making it impossible to **enforce consistency** (e.g., enforcing that a field must be a number).
+
+• **Concurrency:** Simple text files cannot manage simultaneous updates from multiple users. The last update to save will persist, leading to **inconsistent results** because the file lacks concurrency mechanisms.
+
+III. Database Types: Relational vs. Non-Relational
+
+DBMS software is categorized into two major types:
+
+A. Relational Databases
+
+• **Structure:** Organizes data in **tables (rows and columns)**. Relationships between tables are defined using concepts like foreign keys.
+
+• **Schema:** **Strict and predefined schema**. All columns and their data types must be defined beforehand.
+
+• **Advantage:** Offers strong **data integrity** and ensures the data is always in a consistent and accurate state.
+
+• **Query Language:** Uses **SQL (Structured Query Language)**.
+
+• **Examples:** MySQL, **Postgres**, SQL Server.
+
+• **Use Case:** Critical data requiring accuracy and consistency, allowing for complex queries (e.g., **Customer Relationship Management (CRM)** software).
+
+B. Non-Relational (NoSQL) Databases
+
+• **Structure:** Data is typically organized in **collections** (analogous to tables), containing **documents** (analogous to rows).
+
+• **Schema:** **Flexible schema**; does not enforce predefined structure, meaning different documents within the same collection can follow different data structures.
+
+• **Advantage:** Allows developers to move fast, especially during prototyping, without spending time enforcing schema.
+
+• **Example:** MongoDB.
+
+• **Use Case:** Data that is not highly structured or where content type varies widely (e.g., **Content Management System (CMS)** content like articles which may contain images, code blocks, or video embeds).
+
+• **Challenge:** Lack of strong constraints means data integrity must be maintained at the application level, which adds complexity and is more error-prone.
+
+IV. Choosing Postgres and Data Types
+
+A. Rationale for Choosing Postgres
+
+Postgres is often the preferred choice for startups and large companies due to its features:
+
+1. **Open Source and Free:** Not proprietary software.
+
+2. **SQL Standard Compliance:** Sticks to the SQL standard, making it **easy to migrate** to other SQL-compliant systems like MySQL in the future.
+
+3. **Extensibility and Reliability:** Known for reliability, scalability, and an extensive feature set (documentation is around 1,400 pages long).
+
+4. **Excellent JSON Support:** Provides a native **JSONB** (JSON Binary) data type with good indexing and query capabilities. This eliminates the need to switch to a non-relational database solely for handling dynamic, schemaless data (like CMS content).
+
+B. Key Postgres Data Types
+
+|                                                 |                                                                                                                                                                   |                                                                                                                     |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Data Type                                       | Description                                                                                                                                                       | Notes                                                                                                               |
+| **SERIAL** **/** **BIGSERIAL**                  | Integer type that automatically increments with each new entry. Used for **primary keys**.                                                                        | `BIGSERIAL` is preferred in production for greater capacity.                                                        |
+| **DECIMAL** **/** **NUMERIC**                   | Used when **accuracy is critical** (e.g., storing `price` or monetary amounts).                                                                                   | Defines maximum digits and decimal places. Slower to process than floating-point numbers.                           |
+| **REAL** **/** **DOUBLE PRECISION** **(Float)** | Used when **accuracy discrepancies do not highly impact the system** (e.g., size or area measurements).                                                           | Floating-point numbers are faster to store and calculate.                                                           |
+| **CHAR(n)**                                     | Fixed-length text field. Always pads empty spaces up to the defined length (`n`).                                                                                 | Generally an old standard; only use if the length is strictly fixed (e.g., 2-character codes for days of the week). |
+| **VARCHAR(n)**                                  | Variable-length text field. Stores the text without padding, up to the maximum length (`n`).                                                                      | `255` is often used due to MySQL convention but has no special meaning in Postgres.                                 |
+| **TEXT**                                        | Modern alternative to `VARCHAR` without an enforced length limit. Postgres recommends using **TEXT** over `VARCHAR(n)` as there is **no performance difference**. | Avoids database migrations needed to increase the length later.                                                     |
+| **UUID**                                        | Universally Unique Identifier. A popular choice for table primary keys due to their unique nature.                                                                | Postgres offers a native `UUID` type.                                                                               |
+| **JSON** **/** **JSONB**                        | Stores dynamic JSON data. `JSONB` (Binary) is preferred because Postgres serializes it into a native format for **better performance and querying/indexing**.     |                                                                                                                     |
+
+V. Database Change Management: Migrations
+
+Migrations are files containing SQL statements that are applied in a **sequential manner** to manage and track changes to a database schema over time.
+
+• **Workflow:** A command-line tool (e.g., `dbmate`, `go-migrate`) tracks the current database version and executes the SQL files sequentially.
+
+• **Up Migrations:** Contains the SQL statements to apply the desired change (e.g., `CREATE TABLE`, `CREATE INDEX`).
+
+• **Down Migrations:** Contains the SQL statements to **revert** the changes made in the up migration (e.g., `DROP TABLE`, `DROP INDEX`).
+
+• **Purpose of Down Migrations:** Allows developers to **roll back** the database to a previous, consistent state if a new migration causes a failure in a production system.
+
+• **Advantages:** Keeps track of changes, enables rollbacks, and ensures the database schema evolves predictably.
+
+VI. Database Modeling and Relationships
+
+Modeling involves defining tables and the relationships between them, enforced through constraints.
+
+A. Naming Conventions (Postgres Best Practices)
+
+• **Case Sensitivity:** Use **small case** and **snake case** (`full_name`) for all table and field names to avoid using double quotes and complicated case sensitivity issues in application code.
+
+• **Plural Form:** Use the **plural form** for all table names (e.g., `users`, `projects`).
+
+B. Constraints and Referential Integrity
+
+Constraints are conditions applied to fields to protect data integrity and prevent corruption.
+
+|   |   |
+|---|---|
+|Constraint|Purpose|
+|**Primary Key**|Uniquely identifies a row in a table. Implicitly enforces **NOT NULL** and **UNIQUE** constraints.|
+|**Not Null**|Ensures a field cannot be set to a null value. Most table fields should have this constraint.|
+|**Unique**|Ensures that the value of a field is unique across all rows in the table (e.g., the `email` field in the `users` table).|
+|**Foreign Key**|A field that references the primary key of another table. Enforces **Referential Integrity**, ensuring you cannot insert a value that does not exist in the referenced table.|
+|**Check**|Allows a custom condition to be set on a field (e.g., enforcing that a `priority` field value is between 1 and 5).|
+
+**Referential Integrity Constraints (Foreign Keys):** Define server behavior when a referenced row is deleted.
+
+• **ON DELETE RESTRICT****:** Prevents the referenced row from being deleted if dependent rows exist (e.g., preventing a user from being deleted if they still own projects).
+
+• **ON DELETE CASCADE****:** Deletes all associated dependent rows when the referenced row is deleted (e.g., deleting a project and all its associated tasks).
+
+• **ON DELETE SET NULL** **/** **ON DELETE SET DEFAULT****:** Sets the foreign key field to `NULL` or a default value upon deletion of the referenced row.
+
+C. Data Relationships
+
+|   |   |   |
+|---|---|---|
+|Relationship Type|Implementation|Example|
+|**One-to-One**|The primary key of the main table is used as **both the primary key and foreign key** in the linked table.|`users` table and `user_profiles` table (used to abstract profile information that is frequently updated).|
+|**One-to-Many**|The primary key of the "one" side is used as a **foreign key** in the "many" side.|`projects` table (one) and `tasks` table (many).|
+|**Many-to-Many**|Implemented using a **linking table** (e.g., `project_members`) which stores foreign keys from both linked tables.|`users` table and `projects` table.|
+|**Composite Primary Key**|The linking table uses a combination of the two foreign keys (e.g., `project_id` + `user_id`) as its primary key to ensure that combination is unique (e.g., a user can only be part of a project once).||
+
+VII. Querying and Security
+
+A. Seeding Data
+
+Seeding is the process of writing a script (often a migration file) to insert **test data** into the database for testing purposes in development environments.
+
+B. Querying Multiple Tables with Joins
+
+• **JOIN** **(Inner Join):** Returns rows only if there are **matching entries in both tables**.
+
+• **LEFT JOIN****:** Returns all rows from the left table (first table listed) and the matching rows from the right table. If no match exists, it returns `NULL` values for the right table's fields. This is used when you need the data from the primary table regardless of whether the related data exists (e.g., fetching user data even if they lack a profile entry).
+
+C. Parameterized Queries and SQL Injection Defense
+
+A parameterized query is a **safety mechanism** where empty slots are defined in the query, and the dynamic values are provided separately.
+
+• **Security:** Any information passed into the slot is treated as a literal **string** (it is "escaped") and cannot be interpreted as a database action or SQL command.
+
+• **SQL Injection:** This mechanism prevents **SQL injection vulnerabilities**, which occur when dynamic values are constructed by concatenating strings, allowing attackers to insert malicious SQL commands into the query.
+
+D. Dynamic Filters and Sorting
+
+APIs returning lists of entities (e.g., `GET /users`) typically support dynamic filtering and sorting via query parameters.
+
+• **Construction:** Backend code dynamically constructs the SQL query based on what parameters the client provides.
+
+• **Defaults:** If the client does not provide sorting or pagination parameters, the server applies **sane defaults** (e.g., sorting by `created_at` descending, limiting results to 10).
+
+• **Filtering Example:** Using the `ILIKE` operator with a parameterized query and the percentage symbol (`%`) allows for case-insensitive pattern matching (e.g., `WHERE full_name ILIKE 'J%'` finds all names starting with 'J').
+
+• **Pagination:** Implemented using `OFFSET` and `LIMIT` clauses. The frontend page number (starting at 1) must be converted to the database `OFFSET` (starting at 0).
+
+VIII. Performance and Automation
+
+A. Database Indexing (Indices)
+
+Indexing is a feature that drastically improves query performance by avoiding sequential database scans.
+
+• **Concept:** An index is a separate **lookup table** (like the index of a book) that stores a particular field's value and the direct **physical disk location** of the corresponding row.
+
+• **Mechanism:** Instead of sequentially checking every row's data across the disk (a time-consuming process for large tables), the database checks the index first. Once the entry is found in the index, the database can instantly retrieve the row's exact location and access it directly.
+
+• **When to Index:** Indexing is crucial for any field frequently used in three scenarios:
+
+    1. **Join Conditions:** Fields used to link tables (e.g., foreign keys like `project_id` in the `tasks` table).
+
+    2. **WHERE** **Clauses:** Fields used for filtering (e.g., `status`).
+
+    3. **Sort Conditions:** Fields used for ordering results (e.g., `created_at` in descending order).
+
+• **Trade-off:** Maintaining an index requires the database to perform an overhead operation on every insert or update to keep the index lookup table current. This overhead must be evaluated against the performance gain in query speed. Primary key fields are indexed automatically by default.
+
+B. Triggers
+
+Triggers are a database feature used to automate actions when a specific condition is met.
+
+• **Use Case:** Automatically updating the **updated_at** timestamp column every time a row is modified.
+
+• **Implementation:** A custom function is created (e.g., to set `updated_at` to the current time stamp), and a trigger is attached to the desired table(s) to execute this function on every `UPDATE` operation. This removes the need for manual updating via application code.
+
+---
+
+### I. Definition and Importance of Caching
+
+Caching is a fundamental mechanism used to enhance the performance and efficiency of applications by reducing the time and effort required to perform work.
+
+- **Technical Definition:** Caching involves keeping a **subset** of primary data in a location that is **faster and easier to access**. The selection of this subset depends on parameters like frequency of use and probability of next use.
+- **Impact:** Caching is a huge factor in high-performance applications that need to track latency in two-digit microseconds or milliseconds.
+- **Key Scenarios for Caching:** Caching is typically resorted to in two common scenarios where developers want to avoid:
+    1. **Heavy Computation:** Avoiding running resource-intensive algorithms repeatedly (e.g., ranking algorithms).
+    2. **Sending Large Amounts of Data:** Avoiding transferring huge payloads repeatedly (e.g., video files).
+
+### II. Real-World Examples
+
+|Platform|Challenge|Caching Solution and Mechanism|
+|:--|:--|:--|
+|**Google Search**|Search queries (like "what is the weather today") are searched millions of times, requiring expensive re-computation involving crawling, indexing, and ranking of billions of web pages.|Google uses a **distributed in-memory caching system** spread across the world. If a query result is found in the cache (**cache hit**), it returns instantly, avoiding the need to recompute results and lowering server load. If the data is not found (**cache miss**), it is computed and then cached for subsequent use.|
+|**Netflix**|Delivering hundreds and thousands of terabytes of content (movies, series) to millions of global users with minimal buffering.|Netflix uses **CDN (Content Delivery Network)**, which serves content from **Edge locations/servers** that are geographically closer to the end users. This minimizes latency compared to accessing the originating server, which might be in the US. Netflix caches a **subset** of its content based on algorithms (like trend analysis) to optimize cost and resources.|
+|**X (Twitter)**|Identifying trending topics requires analyzing billions of tweets in real-time, involving expensive machine learning and GPU-intensive computations.|To avoid repeating this computation for every user accessing the trending section, Twitter **caches** the results. Since trends typically remain stable for hours or days, caching is safe. This data is stored in an **in-memory key-value store** like Redis.|
+
+### III. Levels of Caching in Backend Engineering
+
+As a backend engineer, you will most frequently encounter three levels of caching:
+
+1. **Network Level Caching:** Involves external infrastructure and network components.
+2. **Hardware Level Caching:** Involves CPU and primary memory architecture.
+3. **Software-Based Caching:** Uses software and libraries (like Redis) to interact with hardware-based primary memory.
+
+### IV. Network Level Caching: CDN and DNS
+
+#### A. Content Delivery Networks (CDNs)
+
+CDNs cache content on geographically distributed servers, often called **Edge nodes** or **Edge servers**, to minimize latency for users in that region.
+
+- **Workflow:**
+    1. User enters a URL, triggering a DNS query to resolve the domain name.
+    2. The CDN DNS system routes the request to the nearest **POP (Point of Presence)**, which is a concentration of multiple Edge servers. Routing considers the user’s geographic location and network conditions (e.g., routing users with slow connections to POPs holding lower-quality video versions).
+    3. The Edge server checks its cache.
+    4. If a **Cache Hit** occurs, the content is returned instantly.
+    5. If a **Cache Miss** occurs, the Edge server fetches the content from the centralized **originating server**.
+- **Time To Live (TTL):** CDNs use TTL to define how long content should remain cached. When TTL expires, the next request will trigger a fetch of fresh content from the originating server.
+
+#### B. DNS Query Caching
+
+The DNS (Domain Name System) process relies heavily on caching to minimize the work required to recursively find the IP address corresponding to a domain name.
+
+- **DNS Resolution Hierarchy:** When a user enters a domain (`example.com`), the resolution path involves checking multiple caches and escalating the query:
+    1. **User Device/OS Cache:** The operating system (Windows, Mac, Linux) checks its local DNS cache first.
+    2. **Browser Cache:** If the OS misses, the modern web browser (Chrome, Firefox) checks its own DNS cache.
+    3. **Recursive Resolver Cache:** The query is sent to the recursive resolver (provided by the ISP or a public DNS provider like Google DNS). This resolver maintains its own cache to avoid recursively querying root servers, TLD servers, and authoritative name servers repeatedly.
+
+### V. Hardware Level Caching and In-Memory Storage
+
+Caching is implemented at the hardware level (L1, L2, L3 caches) to speed up CPU-level operations by storing frequently accessed or predicted data.
+
+- **Primary vs. Secondary Storage:**
+    - **RAM (Random Access Memory) / Main Memory (Primary Storage):** Used by major caching technologies like Redis/Memcached because data access is very fast (due to electrical signal access to memory addresses). RAM offers **fast random access** time but has **limited capacity** and is **volatile** (data clears when power is off).
+    - **Hard Disk/SSDs (Secondary Storage):** Slower than RAM (often involving mechanical or complex operations) but offers **higher capacity** and **persistence** (data survives power loss).
+- **In-Memory Database Persistence:** Technologies like Redis use RAM for high-speed data access but implement mechanisms behind the scenes to leverage **secondary storage** (disk) for **persistence**. Data is loaded from disk into RAM when the program starts.
+
+### VI. Software Caching: In-Memory Key-Value Stores
+
+Technologies like **Redis** and **Memcached** are known as **in-memory key-value based NoSQL databases**.
+
+- **In-Memory:** They store data in the main memory (RAM) instead of traditional disks, making data access operations very fast.
+- **Key-Value:** They have a simple structure of keys and values, unlike relational databases with strict schema and tables.
+- **Simplicity:** Accessing these caches is straightforward (provide key, get value) without the complexity of SQL queries or aggregation.
+
+### VII. Caching Strategies
+
+Backend engineers use different strategies to manage how data enters and is updated in the cache:
+
+1. **Lazy Caching (Cache Aside):**
+    
+    - The server checks the cache upon request.
+    - If there is a cache miss, the server fetches the data from the primary database, **stores it in the cache**, and then returns the result to the client.
+    - This is called "lazy" because data is cached only when it is actually requested.
+2. **Write-Through Caching:**
+    
+    - This is an update strategy where a database change (e.g., POST, PUT, PATCH call) is simultaneously applied to both the **primary database and the cache** within the same execution flow.
+    - **Advantage:** The cache is always fresh, as it is updated instantly.
+    - **Disadvantage:** Introduces overhead to the write operation, as two separate updates must occur.
+
+### VIII. Eviction Policies
+
+Due to the limited capacity of primary memory, eviction policies determine which data must be deleted from the cache when it becomes full, making space for new, high-priority data.
+
+|Policy|Mechanism|Description|
+|:--|:--|:--|
+|**No Eviction**|No policy is configured.|Insertion fails with a memory-full error when capacity is reached.|
+|**LRU (Least Recently Used)**|Tracks the last access time of each key.|Deletes the data point that was **accessed the longest time ago**.|
+|**LFU (Least Frequently Used)**|Tracks the frequency of access for each key.|Deletes the data point that has been **accessed the least number of times** so far.|
+|**TTL (Time to Live) Based**|Uses the configured expiration time of keys.|Selects the key that is scheduled to **expire soonest** to remove from the cache.|
+
+### IX. Backend Use Cases for In-Memory Caches
+
+Backend engineers frequently use in-memory databases like Redis for specific, performance-critical tasks:
+
+1. **Database Query Caching:**
+    
+    - Caching the results of **compute-intensive database queries** (e.g., heavy joins, complex aggregations) that are frequently executed (e.g., dashboard or landing page APIs).
+    - This reduces the latency of the API call and significantly decreases the load on the primary relational database.
+    - It is most effective for **read-heavy operations** where the underlying data changes infrequently (e.g., caching static product details or user profile information).
+2. **Session Storing:**
+    
+    - Storing authentication-related session tokens for users after successful login.
+    - Since data retrieval from Redis is much faster than from disk-based databases, storing sessions in memory avoids latency in subsequent API calls and reduces constant load on the database.
+3. **External API Caching:**
+    
+    - Caching responses from external services (e.g., weather APIs) with a defined TTL (e.g., one hour).
+    - This prevents the server from making repeated requests to the external API, thereby decreasing billing costs and avoiding rate limit constraints, especially for data that is not real-time.
+4. **Rate Limiting Mechanism:**
+    
+    - Rate limiting is typically implemented in a **middleware** before the main route/controller logic.
+    - The middleware identifies the client's public IP (often using the `X-Forwarded-For` header) and uses an in-memory cache to maintain a **counter** for that IP within a time window (e.g., 50 requests per minute).
+    - Storing this counter in Redis is essential because storing it in a relational database would require a database call for _every_ incoming request, significantly increasing latency and flooding the database.
+    - If the counter exceeds the limit, the request is blocked, and a **429 Too Many Requests** status code is returned.
