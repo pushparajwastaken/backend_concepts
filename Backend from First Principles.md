@@ -33,14 +33,14 @@ A typical response message contains:
 
 HTTP methods exist to represent different kinds of **actions** a client can request on a server, defining the **intent** of the interaction and providing clear semantic meaning.
 
-|Method|Intent/Function|Idempotency Status|Description|
-|:--|:--|:--|:--|
-|**GET**|Fetch/Retrieve data.|**Idempotent**.|Should not modify any data on the server. Fetching data multiple times yields the same result.|
-|**POST**|Create new data.|**Non-Idempotent**.|Produces different results for the same request if called multiple times (e.g., submitting the same request twice creates two resources). Has a request body to send data.|
-|**PATCH**|Update or selectively replace some data.|Considered part of the idempotent category.|Can be thought of as an append action or selective replacement; has a request body.|
-|**PUT**|Update data, but **completely replaces** the previous instance with the data in the request body.|**Idempotent**.|Replacing old data with the new data multiple times yields the same final result.|
-|**DELETE**|Delete a resource.|**Idempotent**.|A resource can only be deleted once; subsequent attempts have the same outcome (resource remains deleted).|
-|**OPTIONS**|Fetch server capabilities.|N/A|Used in the CORS flow (pre-flight requests) to inquire about supported methods and headers.|
+| Method      | Intent/Function                                                                                   | Idempotency Status                          | Description                                                                                                                                                                |
+| :---------- | :------------------------------------------------------------------------------------------------ | :------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **GET**     | Fetch/Retrieve data.                                                                              | **Idempotent**.                             | Should not modify any data on the server. Fetching data multiple times yields the same result.                                                                             |
+| **POST**    | Create new data.                                                                                  | **Non-Idempotent**.                         | Produces different results for the same request if called multiple times (e.g., submitting the same request twice creates two resources). Has a request body to send data. |
+| **PATCH**   | Update or selectively replace some data.                                                          | Considered part of the idempotent category. | Can be thought of as an append action or selective replacement; has a request body.                                                                                        |
+| **PUT**     | Update data, but **completely replaces** the previous instance with the data in the request body. | **Idempotent**.                             | Replacing old data with the new data multiple times yields the same final result.                                                                                          |
+| **DELETE**  | Delete a resource.                                                                                | **Idempotent**.                             | A resource can only be deleted once; subsequent attempts have the same outcome (resource remains deleted).                                                                 |
+| **OPTIONS** | Fetch server capabilities.                                                                        | N/A                                         | Used in the CORS flow (pre-flight requests) to inquire about supported methods and headers.                                                                                |
 
 ## 3. HTTP Headers (Metadata)
 
@@ -84,16 +84,18 @@ A pre-flight request is triggered by the browser if a cross-origin request is de
 ### Pre-flight Request/Response Interaction
 
 1. **Client (Browser) sends OPTIONS Request:** The browser sends the OPTIONS request containing necessary headers to inquire about the server's support, such as:
-    - `Access-Control-Request-Method` (e.g., asking if PUT is allowed).
-    - `Access-Control-Request-Headers` (e.g., asking if the `Authorization` header is allowed).
-    - `Origin` (identifying the client's domain).
+   - `Access-Control-Request-Method` (e.g., asking if PUT is allowed).
+   - `Access-Control-Request-Headers` (e.g., asking if the `Authorization` header is allowed).
+   - `Origin` (identifying the client's domain).
 2. **Server Responds (If CORS is Handled):** If the server supports the cross-origin request, it typically responds with a **204 No Content** status code and specific headers indicating what is permitted. These response headers include:
-    - **`Access-Control-Allow-Origin`**: Specifies the client's domain (or `*` for all domains).
-    - **`Access-Control-Allow-Methods`**: Lists the HTTP methods allowed for that resource (e.g., GET, POST, PUT, DELETE).
-    - **`Access-Control-Allow-Headers`**: Lists the non-simple headers the server accepts (e.g., `Content-Type`, `Authorization`).
-    - **`Access-Control-Max-Age`**: Instructs the browser how long (in seconds) it can cache the pre-flight results, preventing unnecessary subsequent OPTIONS requests.
+   - **`Access-Control-Allow-Origin`**: Specifies the client's domain (or `*` for all domains).
+   - **`Access-Control-Allow-Methods`**: Lists the HTTP methods allowed for that resource (e.g., GET, POST, PUT, DELETE).
+   - **`Access-Control-Allow-Headers`**: Lists the non-simple headers the server accepts (e.g., `Content-Type`, `Authorization`).
+   - **`Access-Control-Max-Age`**: Instructs the browser how long (in seconds) it can cache the pre-flight results, preventing unnecessary subsequent OPTIONS requests.
 3. **Browser Proceeds:** If the browser successfully checks off all these conditions, it then proceeds to send the **original** request (e.g., the PUT request with the body). If the server fails to return the appropriate CORS headers, the browser blocks the response, resulting in a CORS error.
+
 ---
+
 ## Notes on Routing in Backend Systems
 
 ### 1. Defining Routing
@@ -128,10 +130,10 @@ Nested routes are a common practice in REST APIs used to express the **semantic 
 
 - **Structure:** They involve nesting different types of information at different levels (e.g., `/API/users/:user_ID/posts/:post_ID`).
 - **Meaning:** Each level of nesting provides a different semantic meaning and corresponds to a different unique route match on the server side, resulting in different responses.
-    - `/API/users` $\rightarrow$ Returns a list of all users.
-    - `/API/users/123` $\rightarrow$ Returns details of user 123.
-    - `/API/users/123/posts` $\rightarrow$ Returns all posts belonging to user 123.
-    - `/API/users/123/posts/456` $\rightarrow$ Returns a particular post (ID 456) belonging to user 123.
+  - `/API/users` $\rightarrow$ Returns a list of all users.
+  - `/API/users/123` $\rightarrow$ Returns details of user 123.
+  - `/API/users/123/posts` $\rightarrow$ Returns all posts belonging to user 123.
+  - `/API/users/123/posts/456` $\rightarrow$ Returns a particular post (ID 456) belonging to user 123.
 
 ### 3. Query Parameters
 
@@ -141,9 +143,9 @@ Query parameters are key-value pairs used to send non-semantic or auxiliary data
 - **Primary Use Case:** They are typically used with **GET requests** because GET requests do not have a body to send data.
 - **Function:** They allow the client to send a set of key-value pairs to the server to attach **metadata about the request**.
 - **Applications:** Query parameters are commonly used for functionalities such as:
-    - **Search/Filtering:** Sending a search value.
-    - **Pagination:** Specifying which page or limit the client requires (e.g., `page=2`, `limit=20`).
-    - **Sorting:** Specifying the desired sort order (ascending or descending).
+  - **Search/Filtering:** Sending a search value.
+  - **Pagination:** Specifying which page or limit the client requires (e.g., `page=2`, `limit=20`).
+  - **Sorting:** Specifying the desired sort order (ascending or descending).
 
 ### 4. Advanced Routing Concepts
 
@@ -162,6 +164,7 @@ The catch-all route handles requests that do not match any defined server endpoi
 - **Function:** Instead of sending a default null response, the catch-all handler maps the request to server logic that returns a **user-friendly message** (e.g., "route not found" or 404) to the client, clearly stating that the requested endpoint does not exist.
 
 ---
+
 ### 1. Core Concepts: Authentication vs. Authorization
 
 - **Authentication:** The process of assigning an **identity** to a subject. It answers the question, **"Who are you?"** in a given context (platform, operating system).
@@ -173,16 +176,16 @@ The catch-all route handles requests that do not match any defined server endpoi
 
 The need for authentication evolved as societies grew and interactions moved beyond familiar circles.
 
-|Era|Authentication Mechanism & Principle|Notes|
-|:--|:--|:--|
-|**Pre-Industrial**|**Implicit Trust**|Based on human contextual trust (e.g., village Elder vouching for someone, handshake agreement). Failed to scale.|
-|**Medieval Period**|**Seals** (Wax Seals)|Early cryptographic mechanism and the first widely adopted **authentication tokens**. Relied on **"something you possess"**. Forgery was the first recorded instance of an authentication bypass attack.|
-|**Industrial Revolution**|**Pass Phrases** (Telegraph)|Early form of **shared secrets** relying on the principle of **"something you know"**. Precursor to static passwords.|
-|**Mid-20th Century**|**Passwords (Digital Phase)**|Introduced for multi-user mainframes (MIT Project Mac). An incident involving a plain text password file led to the genesis of **secure password storage**.|
-|**Modern Storage**|**Hashing**|Cryptographic algorithms transform passwords into **irreversible, fixed-length representations**. Authentication aligned with confidentiality, integrity, and availability.|
-|**Cryptographic Era**|**Asymmetric Cryptography**|Diffie-Hellman key exchange introduced asymmetric cryptography, enabling shared secrets over untrusted mediums. This became the backbone of modern protocols (PKI). Kerberos introduced **ticket-based authentication**.|
-|**Internet Era**|**Multi-Factor Authentication (MFA)**|Combined layers of security: "something you know" (passwords), "something you have" (OTP generators), and "something you are" (biometric data).|
-|**21st Century**|**Advanced Frameworks**|Driven by cloud, mobile, and API architectures, leading to **OAuth 2.0**, **JWTs**, Zero Trust, and passwordless systems (WebAuthn).|
+| Era                       | Authentication Mechanism & Principle  | Notes                                                                                                                                                                                                                    |
+| :------------------------ | :------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Pre-Industrial**        | **Implicit Trust**                    | Based on human contextual trust (e.g., village Elder vouching for someone, handshake agreement). Failed to scale.                                                                                                        |
+| **Medieval Period**       | **Seals** (Wax Seals)                 | Early cryptographic mechanism and the first widely adopted **authentication tokens**. Relied on **"something you possess"**. Forgery was the first recorded instance of an authentication bypass attack.                 |
+| **Industrial Revolution** | **Pass Phrases** (Telegraph)          | Early form of **shared secrets** relying on the principle of **"something you know"**. Precursor to static passwords.                                                                                                    |
+| **Mid-20th Century**      | **Passwords (Digital Phase)**         | Introduced for multi-user mainframes (MIT Project Mac). An incident involving a plain text password file led to the genesis of **secure password storage**.                                                              |
+| **Modern Storage**        | **Hashing**                           | Cryptographic algorithms transform passwords into **irreversible, fixed-length representations**. Authentication aligned with confidentiality, integrity, and availability.                                              |
+| **Cryptographic Era**     | **Asymmetric Cryptography**           | Diffie-Hellman key exchange introduced asymmetric cryptography, enabling shared secrets over untrusted mediums. This became the backbone of modern protocols (PKI). Kerberos introduced **ticket-based authentication**. |
+| **Internet Era**          | **Multi-Factor Authentication (MFA)** | Combined layers of security: "something you know" (passwords), "something you have" (OTP generators), and "something you are" (biometric data).                                                                          |
+| **21st Century**          | **Advanced Frameworks**               | Driven by cloud, mobile, and API architectures, leading to **OAuth 2.0**, **JWTs**, Zero Trust, and passwordless systems (WebAuthn).                                                                                     |
 
 ---
 
@@ -192,10 +195,10 @@ The need for authentication evolved as societies grew and interactions moved bey
 
 - **Necessity:** HTTP is **stateless**. Sessions were introduced to handle dynamic content (e-commerce carts, user logins) by providing a **temporary server-side context**.
 - **Workflow:**
-    1. User logs in.
-    2. Server creates a unique **Session ID** and stores it along with user data (e.g., user ID, roles, cart items) in a **persistent store** (Database, Redis).
-    3. The Session ID is sent back to the client as a **Cookie**.
-    4. Subsequent requests include the cookie/ID, which the server uses to fetch the user's state from the persistent store.
+  1. User logs in.
+  2. Server creates a unique **Session ID** and stores it along with user data (e.g., user ID, roles, cart items) in a **persistent store** (Database, Redis).
+  3. The Session ID is sent back to the client as a **Cookie**.
+  4. Subsequent requests include the cookie/ID, which the server uses to fetch the user's state from the persistent store.
 - **Storage Evolution:** Sessions moved from file-based storage (poor scalability) to database-backed, and eventually to distributed, in-memory stores like **Redis** for faster lookups.
 
 ### B. JWTs (JSON Web Tokens - Stateless Mechanism)
@@ -203,16 +206,16 @@ The need for authentication evolved as societies grew and interactions moved bey
 - **Emergence:** Driven by the high cost and latency of maintaining and replicating session data for millions of users across globally distributed systems. JWTs offer a way to **offload state from the server**.
 - **Characteristics:** JWTs are **self-contained tokens** that transfer claims (data) in a stateless manner.
 - **Structure (3 parts, Base 64 encoded):**
-    1. **Header:** Metadata (e.g., signing algorithm).
-    2. **Payload (Claims):** User data like `sub` (User ID), `iat` (Issued At), name, and role.
-    3. **Signature:** Used with a server-side **secret key** to cryptographically verify the token’s authenticity and integrity (checking for tampering).
+  1. **Header:** Metadata (e.g., signing algorithm).
+  2. **Payload (Claims):** User data like `sub` (User ID), `iat` (Issued At), name, and role.
+  3. **Signature:** Used with a server-side **secret key** to cryptographically verify the token’s authenticity and integrity (checking for tampering).
 - **Advantages (Pros):**
-    - **Statelessness:** Eliminates server-side storage costs.
-    - **Scalability:** Ideal for microservice architectures, as multiple servers can verify the token using a shared secret key without needing to synchronize session data.
-    - **Portability:** Lightweight and URL-friendly (Base 64 encoded string).
+  - **Statelessness:** Eliminates server-side storage costs.
+  - **Scalability:** Ideal for microservice architectures, as multiple servers can verify the token using a shared secret key without needing to synchronize session data.
+  - **Portability:** Lightweight and URL-friendly (Base 64 encoded string).
 - **Disadvantages (Cons):**
-    - **Token Theft:** If accessed, the token can be used to impersonate the user.
-    - **Complex Revocation:** Since the server holds no state, a token cannot be invalidated until it expires, unless the global secret key is changed (which forces all users to log out).
+  - **Token Theft:** If accessed, the token can be used to impersonate the user.
+  - **Complex Revocation:** Since the server holds no state, a token cannot be invalidated until it expires, unless the global secret key is changed (which forces all users to log out).
 - **Hybrid Approach:** Combining JWTs with statefulness by maintaining a **blacklist** of revoked tokens in persistent storage. This solves revocation but defeats the purpose of statelessness by requiring a storage lookup on every request.
 
 ### C. Cookies
@@ -225,12 +228,12 @@ The need for authentication evolved as societies grew and interactions moved bey
 
 ## 4. Authentication Types and Use Cases
 
-|Type|Mechanism|Pros/Cons|Ideal Use Case|
-|:--|:--|:--|:--|
-|**Stateful**|Stores session data/ID in a persistent store (Redis/DB).|**Pros:** Centralized control, easy revocation/logout. **Cons:** Limited scalability, complex in distributed systems.|**Web App** based workflows and SAS models where strict session control is required.|
-|**Stateless**|Uses self-contained, signed JWTs; no persistent storage lookup.|**Pros:** High scalability, no session dependency, mobile-friendly. **Cons:** Token revocation is complex.|**APIs** and scalable systems with distributed servers, where tokens carry user information.|
-|**API Key Based**|Uses a cryptographically safe string attached to requests.|**Pros:** Easy to generate. Ideal for non-human interaction.|**Machine-to-machine** (server-to-server) communication or single-purpose client access.|
-|**OAuth 2.0 / OIDC**|Uses tokens (e.g., Access Token, ID Token) for delegated access.|Solves the security risk of sharing passwords to grant cross-platform access (Delegation Problem).|**Third-party integrations** (e.g., travel app accessing Gmail) and providing login via external providers ("Sign in with Google").|
+| Type                 | Mechanism                                                        | Pros/Cons                                                                                                             | Ideal Use Case                                                                                                                      |
+| :------------------- | :--------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------- |
+| **Stateful**         | Stores session data/ID in a persistent store (Redis/DB).         | **Pros:** Centralized control, easy revocation/logout. **Cons:** Limited scalability, complex in distributed systems. | **Web App** based workflows and SAS models where strict session control is required.                                                |
+| **Stateless**        | Uses self-contained, signed JWTs; no persistent storage lookup.  | **Pros:** High scalability, no session dependency, mobile-friendly. **Cons:** Token revocation is complex.            | **APIs** and scalable systems with distributed servers, where tokens carry user information.                                        |
+| **API Key Based**    | Uses a cryptographically safe string attached to requests.       | **Pros:** Easy to generate. Ideal for non-human interaction.                                                          | **Machine-to-machine** (server-to-server) communication or single-purpose client access.                                            |
+| **OAuth 2.0 / OIDC** | Uses tokens (e.g., Access Token, ID Token) for delegated access. | Solves the security risk of sharing passwords to grant cross-platform access (Delegation Problem).                    | **Third-party integrations** (e.g., travel app accessing Gmail) and providing login via external providers ("Sign in with Google"). |
 
 ### OAuth 2.0 & OIDC Explained
 
@@ -262,10 +265,11 @@ Backend engineers must employ defensive measures during authentication to preven
 
 - **Risk:** Attackers measure the response time. A request failing early (invalid username) is faster than a request failing late (invalid password, requires time for hashing before failure). This delay difference allows attackers to distinguish between a username failure and a password failure.
 - **Defense (Equalizing Response Times):**
-    1. **Constant Time Operations:**  Use cryptographically secure comparison functions for password hashes that ensure execution time does not vary based on input similarity.
-    2. **Simulate Delay:** Introduce a fake response delay (e.g., using `set timeout` or `time.sleep`) even for early failures (e.g., username mismatch), preventing attackers from measuring the timing difference.
+  1. **Constant Time Operations:** Use cryptographically secure comparison functions for password hashes that ensure execution time does not vary based on input similarity.
+  2. **Simulate Delay:** Introduce a fake response delay (e.g., using `set timeout` or `time.sleep`) even for early failures (e.g., username mismatch), preventing attackers from measuring the timing difference.
 
 ---
+
 ## Validations and Transformations in Backend APIs
 
 Validations and transformations are fundamental processes designed to enforce a set of rules and guidelines related to **data integrity and security** when designing APIs.
@@ -353,9 +357,11 @@ It is a common mistake to replace backend validation with frontend validation. B
 | **Purpose**         | **User Experience (UX)** and providing immediate feedback to the user.                                                                              | **Security and Data Integrity**. It is mandatory for API design.                                |
 | **Security Status** | **Not for security**. It can be easily bypassed by clients like Insomnia or Postman, which interact directly with the API without a form interface. | **Mandatory.** The server must be as strict and specific as possible, regardless of the client. |
 | **Workflow**        | If validation is successful, the API call is made; if unsuccessful, errors are shown in the form itself.                                            | Performs Security checks and enforces mandatory data integrity.                                 |
+
 These notes summarize the key concepts of handlers/controllers, services, repositories, middlewares, and request context, drawing directly from the provided transcript.
 
 ---
+
 ### I. Request Life Cycle Overview
 
 The request life cycle is what happens inside the server from the moment a client request reaches the entry point until the moment a response is sent back.
@@ -371,50 +377,50 @@ The request life cycle is what happens inside the server from the moment a clien
 
 The Handler or Controller is the entry point after the routing algorithm determines the target function.
 
-|Aspect|Description|Source|
-|:--|:--|:--|
-|**Input/Output**|Receives a **request object** (for reading input) and a **response object** (for modifying headers and sending output). The runtime (e.g., Go, Node.js) provides these objects.||
-|**Primary Goal**|Controls the data flow from the client to the server and from the server back to the client. **Limits all HTTP-related processes to this layer**.||
-|**Responsibilities**|1. **Data Extraction:** Takes values from the request object (query parameters, request body). 2. **Deserialization/Binding:** Converts serialized data (e.g., JSON) into the native format of the programming language (e.g., struct in Go). If this fails, it sends a **400 Bad Request** error. 3. **Validation and Transformation:** Validates data against expected formats and sets defaults or modifies data for convenient downstream processing. 4. **Calling Service Layer:** Passes validated/transformed data to the service layer for processing. 5. **Response Sending:** Decides on the appropriate **response code** (e.g., 200 series for success, 400/500 for errors) and sends the final response body back to the client.||
+| Aspect               | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Source |
+| :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----- |
+| **Input/Output**     | Receives a **request object** (for reading input) and a **response object** (for modifying headers and sending output). The runtime (e.g., Go, Node.js) provides these objects.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |        |
+| **Primary Goal**     | Controls the data flow from the client to the server and from the server back to the client. **Limits all HTTP-related processes to this layer**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |        |
+| **Responsibilities** | 1. **Data Extraction:** Takes values from the request object (query parameters, request body). 2. **Deserialization/Binding:** Converts serialized data (e.g., JSON) into the native format of the programming language (e.g., struct in Go). If this fails, it sends a **400 Bad Request** error. 3. **Validation and Transformation:** Validates data against expected formats and sets defaults or modifies data for convenient downstream processing. 4. **Calling Service Layer:** Passes validated/transformed data to the service layer for processing. 5. **Response Sending:** Decides on the appropriate **response code** (e.g., 200 series for success, 400/500 for errors) and sends the final response body back to the client. |        |
 
 ### III. Services Layer
 
 The service layer is where the **actual processing** of the API logic happens.
 
-|Aspect|Description|Source|
-|:--|:--|:--|
-|**Isolation**|Should not deal with any HTTP-related concerns (like response codes or validation). Ideally, looking at a service method, one should not be able to tell that it is being used in an API.||
-|**Responsibilities**|1. **Core Processing:** Executes non-database logic, such as sending emails or notifications. 2. **Orchestration:** Merges or manipulates data returned from multiple repository methods or external API calls. 3. **Database Delegation:** Calls the repository layer for operations that require persisting or fetching data.||
+| Aspect               | Description                                                                                                                                                                                                                                                                                                                     | Source |
+| :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----- |
+| **Isolation**        | Should not deal with any HTTP-related concerns (like response codes or validation). Ideally, looking at a service method, one should not be able to tell that it is being used in an API.                                                                                                                                       |        |
+| **Responsibilities** | 1. **Core Processing:** Executes non-database logic, such as sending emails or notifications. 2. **Orchestration:** Merges or manipulates data returned from multiple repository methods or external API calls. 3. **Database Delegation:** Calls the repository layer for operations that require persisting or fetching data. |        |
 
 ### IV. Repository Layer (Database Layer)
 
 The repository layer or database layer interacts directly with the database.
 
-|Aspect|Description|Source|
-|:--|:--|:--|
-|**Sole Responsibility**|Takes the necessary data (e.g., filtering, sorting, insertion data) and **constructs the database query**, then returns the result received from the database.||
-|**Design Principle**|**Single Responsibility:** Each repository method should return only one kind of data (e.g., a method for getting all books should be separate from a method for getting a single book).||
+| Aspect                  | Description                                                                                                                                                                              | Source |
+| :---------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----- |
+| **Sole Responsibility** | Takes the necessary data (e.g., filtering, sorting, insertion data) and **constructs the database query**, then returns the result received from the database.                           |        |
+| **Design Principle**    | **Single Responsibility:** Each repository method should return only one kind of data (e.g., a method for getting all books should be separate from a method for getting a single book). |        |
 
 ### V. Middlewares
 
 Middlewares are optional functions that are executed during the request life cycle, often before routing, after routing, or before sending the response.
 
-|Aspect|Description|Source|
-|:--|:--|:--|
-|**Goal**|To **reduce code duplication and redundancy** by executing common operations across all (or many) requests.||
-|**Key Components**|A middleware receives three objects: 1. **Request** 2. **Response** 3. **`next` function** (used to pass execution to the next processing context).||
-|**Execution Flow**|A middleware can perform logic, modify the request/response, and then either use `next()` to continue execution or send a response back immediately, terminating the request early. **The order of middleware execution is important**.||
-|**Common Uses**|**Security:** CORS, authentication (sending **401 Unauthorized** on failure), rate limiting (sending **429 Too Many Requests** on excess), adding security headers. **Utility:** Logging and monitoring, compression of large responses, data passing (serialization/deserialization). **Global Error Handling:** Usually placed as the **last middleware** to catch unstructured errors from any layer (Handler, Service, etc.) and convert them into a structured, appropriate response (400 or 500).||
+| Aspect             | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Source |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----- |
+| **Goal**           | To **reduce code duplication and redundancy** by executing common operations across all (or many) requests.                                                                                                                                                                                                                                                                                                                                                                                             |        |
+| **Key Components** | A middleware receives three objects: 1. **Request** 2. **Response** 3. **`next` function** (used to pass execution to the next processing context).                                                                                                                                                                                                                                                                                                                                                     |        |
+| **Execution Flow** | A middleware can perform logic, modify the request/response, and then either use `next()` to continue execution or send a response back immediately, terminating the request early. **The order of middleware execution is important**.                                                                                                                                                                                                                                                                 |        |
+| **Common Uses**    | **Security:** CORS, authentication (sending **401 Unauthorized** on failure), rate limiting (sending **429 Too Many Requests** on excess), adding security headers. **Utility:** Logging and monitoring, compression of large responses, data passing (serialization/deserialization). **Global Error Handling:** Usually placed as the **last middleware** to catch unstructured errors from any layer (Handler, Service, etc.) and convert them into a structured, appropriate response (400 or 500). |        |
 
 ### VI. Request Context
 
 The request context is a storage mechanism or state that is **scoped and limited to a particular request**.
 
-|Aspect|Description|Source|
-|:--|:--|:--|
-|**Nature**|Typically functions as a key-value storage. Every request will have a context attached to it.||
-|**Purpose**|To provide a **shared state** accessible to all execution environments (middlewares, handlers) of that single request. This prevents the system from being closely coupled.||
-|**Common Uses**|1. **Storing Authentication Metadata:** An authentication middleware can verify a token, extract the **user ID, user role, or permissions**, save this data to the context, and forward it. Downstream handlers can then use this trusted data (e.g., for database insertion) instead of relying on input from the client. 2. **Request Tracing:** Generating a unique request ID (e.g., UUID) early in the life cycle and storing it in the context, allowing the ID to be used in logs and downstream service calls for auditing and debugging. 3. **Control:** Sending cancellation signals, abort signals, or deadlines to external services.||
+| Aspect          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Source |
+| :-------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----- |
+| **Nature**      | Typically functions as a key-value storage. Every request will have a context attached to it.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |        |
+| **Purpose**     | To provide a **shared state** accessible to all execution environments (middlewares, handlers) of that single request. This prevents the system from being closely coupled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |        |
+| **Common Uses** | 1. **Storing Authentication Metadata:** An authentication middleware can verify a token, extract the **user ID, user role, or permissions**, save this data to the context, and forward it. Downstream handlers can then use this trusted data (e.g., for database insertion) instead of relying on input from the client. 2. **Request Tracing:** Generating a unique request ID (e.g., UUID) early in the life cycle and storing it in the context, allowing the ID to be used in logs and downstream service calls for auditing and debugging. 3. **Control:** Sending cancellation signals, abort signals, or deadlines to external services. |        |
 
 ---
 
@@ -428,6 +434,7 @@ The entire backend architecture process can be compared to a high-end restaurant
 - **The Request Context** is the slip of paper attached to the order that follows the food through every station, detailing the table number (Request ID) and customer allergies or preferences (User Permissions).
 - **The Service Layer** is the Chef. They manage the overall preparation, combining ingredients, and ensuring the dishes are cooked properly (Core Logic/Orchestration).
 - **The Repository Layer** is the Pantry/Supply Manager. They are responsible only for fetching specific, raw ingredients or storing them safely (Database Interaction), exactly as requested by the Chef.
+
 ---
 
 ## Complete REST API Design Notes
@@ -439,6 +446,7 @@ API design is a critical aspect of backend engineering. This discussion focuses 
 - **Goal of Standardization:** Sticking to existing REST standards and guidelines helps backend engineers avoid common confusions (e.g., using PUT vs. PATCH, choosing status codes) and allows them to focus primarily on **business logic**.
 - **Historical Foundation:** The World Wide Web project was started by Tim Berners-Lee in 1990 to facilitate global knowledge sharing. He invented crucial technologies like **URI**, **HTTP**, and **HTML**.
 - **The Scalability Crisis:** The project faced a breakdown due to the exponential growth of its user base.
+
 ### II. REST Architectural Constraints (Roy Fielding’s Contribution)
 
 Around 1993, Roy Fielding proposed several constraints to address web scalability, which later formed the basis of the REST architectural style, named in his 2000 PhD dissertation.
@@ -473,6 +481,7 @@ Backend API design starts by defining the resources and creating intuitive route
 - **Resource Naming (The Plural Rule):** All resources in the path segment of the URL **must always be in the plural form**. This applies even when fetching, updating, or deleting a single resource (e.g., `/books/123` not `/book/123`).
 - **Readability:** Avoid spaces or underscores in URLs. If phrases contain spaces, use hyphens (`-`) to create a readable slug (e.g., `harry-potter`).
 - **Hierarchical Paths:** The forward slash (`/`) indicates a hierarchical relationship between resources (e.g., `/organizations/:org_ID/projects/:proj_ID`). Each segment corresponds to a specific resource or collection.
+
 ### V. HTTP Methods and Idempotency
 
 **Idempotency** means performing the same action multiple times yields the same final result as performing it once.
@@ -494,14 +503,14 @@ List APIs (GET requests returning a collection of resources) require mechanisms 
 
 - **Purpose:** Only returns a **portion** of the data in the response, preventing performance issues associated with serializing/deserializing large payloads.
 - **Client Control:** Handled via URL query parameters:
-    - **`limit`**: Defines the number of resources returned per page.
-    - **`page`**: Defines which portion of the data is requested.
+  - **`limit`**: Defines the number of resources returned per page.
+  - **`page`**: Defines which portion of the data is requested.
 - **Server Defaults:** If the client omits these parameters, the server should apply **sane defaults** (e.g., `page=1`, `limit=10` or `20`).
 - **Response Structure:** A paginated response should include:
-    - `data`: The array of resources.
-    - `total`: The total count of all resources in the database.
-    - `page`: The current page number being returned.
-    - `total_pages`: The total number of pages available.
+  - `data`: The array of resources.
+  - `total`: The total count of all resources in the database.
+  - `page`: The current page number being returned.
+  - `total_pages`: The total number of pages available.
 
 #### 2. Sorting
 
@@ -516,12 +525,12 @@ List APIs (GET requests returning a collection of resources) require mechanisms 
 
 Choosing the correct HTTP status code is essential for communicating the result of the API call to the client.
 
-|Status Code|Usage Context|Explanation|
-|:--|:--|:--|
-|**200 OK**|Successful GET (List or Single), PATCH/PUT, and Custom Action (POST)|General successful response.|
-|**201 Created**|Successful POST (Creation)|Used when a **new resource is successfully created**. The response body should contain the newly created entity.|
-|**204 No Content**|Successful DELETE|Used for successful operations where the server has **no content** to return to the client (typically used for delete operations).|
-|**404 Not Found**|Client Error (Specific Entity)|Used when the client requests a **particular entity** (e.g., an organization ID) that does not exist in the server. **Never use 404 for list APIs**; if a list API returns no data, return `200 OK` with an empty array.|
+| Status Code        | Usage Context                                                        | Explanation                                                                                                                                                                                                              |
+| :----------------- | :------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **200 OK**         | Successful GET (List or Single), PATCH/PUT, and Custom Action (POST) | General successful response.                                                                                                                                                                                             |
+| **201 Created**    | Successful POST (Creation)                                           | Used when a **new resource is successfully created**. The response body should contain the newly created entity.                                                                                                         |
+| **204 No Content** | Successful DELETE                                                    | Used for successful operations where the server has **no content** to return to the client (typically used for delete operations).                                                                                       |
+| **404 Not Found**  | Client Error (Specific Entity)                                       | Used when the client requests a **particular entity** (e.g., an organization ID) that does not exist in the server. **Never use 404 for list APIs**; if a list API returns no data, return `200 OK` with an empty array. |
 
 ### VIII. General API Design Best Practices
 
@@ -531,7 +540,8 @@ Choosing the correct HTTP status code is essential for communicating the result 
 - **Avoid Abbreviations:** Use full, readable field names (e.g., `description` not `DSC`) to prevent confusion for consumers who lack context.
 - **Sane Defaults (Post Calls):** For creation (POST) operations, provide safe default values for fields that are not strictly necessary but are expected by the server (e.g., default `status` to `active` if the client doesn't send it).
 - **Interactive Documentation:** Provide interactive documentation tools (like Swagger/OpenAPI) for consumers to test and understand the API behavior, minimizing communication overhead and errors.
---------------------------------------------------------------------------------
+
+---
 
 Detailed Notes: Mastering Databases with Postgres
 
@@ -677,32 +687,32 @@ B. Constraints and Referential Integrity
 
 Constraints are conditions applied to fields to protect data integrity and prevent corruption.
 
-|   |   |
-|---|---|
-|Constraint|Purpose|
-|**Primary Key**|Uniquely identifies a row in a table. Implicitly enforces **NOT NULL** and **UNIQUE** constraints.|
-|**Not Null**|Ensures a field cannot be set to a null value. Most table fields should have this constraint.|
-|**Unique**|Ensures that the value of a field is unique across all rows in the table (e.g., the `email` field in the `users` table).|
-|**Foreign Key**|A field that references the primary key of another table. Enforces **Referential Integrity**, ensuring you cannot insert a value that does not exist in the referenced table.|
-|**Check**|Allows a custom condition to be set on a field (e.g., enforcing that a `priority` field value is between 1 and 5).|
+|                 |                                                                                                                                                                               |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Constraint      | Purpose                                                                                                                                                                       |
+| **Primary Key** | Uniquely identifies a row in a table. Implicitly enforces **NOT NULL** and **UNIQUE** constraints.                                                                            |
+| **Not Null**    | Ensures a field cannot be set to a null value. Most table fields should have this constraint.                                                                                 |
+| **Unique**      | Ensures that the value of a field is unique across all rows in the table (e.g., the `email` field in the `users` table).                                                      |
+| **Foreign Key** | A field that references the primary key of another table. Enforces **Referential Integrity**, ensuring you cannot insert a value that does not exist in the referenced table. |
+| **Check**       | Allows a custom condition to be set on a field (e.g., enforcing that a `priority` field value is between 1 and 5).                                                            |
 
 **Referential Integrity Constraints (Foreign Keys):** Define server behavior when a referenced row is deleted.
 
-• **ON DELETE RESTRICT****:** Prevents the referenced row from being deleted if dependent rows exist (e.g., preventing a user from being deleted if they still own projects).
+• **ON DELETE RESTRICT\*\***:\*\* Prevents the referenced row from being deleted if dependent rows exist (e.g., preventing a user from being deleted if they still own projects).
 
-• **ON DELETE CASCADE****:** Deletes all associated dependent rows when the referenced row is deleted (e.g., deleting a project and all its associated tasks).
+• **ON DELETE CASCADE\*\***:\*\* Deletes all associated dependent rows when the referenced row is deleted (e.g., deleting a project and all its associated tasks).
 
-• **ON DELETE SET NULL** **/** **ON DELETE SET DEFAULT****:** Sets the foreign key field to `NULL` or a default value upon deletion of the referenced row.
+• **ON DELETE SET NULL** **/** **ON DELETE SET DEFAULT\*\***:\*\* Sets the foreign key field to `NULL` or a default value upon deletion of the referenced row.
 
 C. Data Relationships
 
-|   |   |   |
-|---|---|---|
-|Relationship Type|Implementation|Example|
-|**One-to-One**|The primary key of the main table is used as **both the primary key and foreign key** in the linked table.|`users` table and `user_profiles` table (used to abstract profile information that is frequently updated).|
-|**One-to-Many**|The primary key of the "one" side is used as a **foreign key** in the "many" side.|`projects` table (one) and `tasks` table (many).|
-|**Many-to-Many**|Implemented using a **linking table** (e.g., `project_members`) which stores foreign keys from both linked tables.|`users` table and `projects` table.|
-|**Composite Primary Key**|The linking table uses a combination of the two foreign keys (e.g., `project_id` + `user_id`) as its primary key to ensure that combination is unique (e.g., a user can only be part of a project once).||
+|                           |                                                                                                                                                                                                          |                                                                                                            |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Relationship Type         | Implementation                                                                                                                                                                                           | Example                                                                                                    |
+| **One-to-One**            | The primary key of the main table is used as **both the primary key and foreign key** in the linked table.                                                                                               | `users` table and `user_profiles` table (used to abstract profile information that is frequently updated). |
+| **One-to-Many**           | The primary key of the "one" side is used as a **foreign key** in the "many" side.                                                                                                                       | `projects` table (one) and `tasks` table (many).                                                           |
+| **Many-to-Many**          | Implemented using a **linking table** (e.g., `project_members`) which stores foreign keys from both linked tables.                                                                                       | `users` table and `projects` table.                                                                        |
+| **Composite Primary Key** | The linking table uses a combination of the two foreign keys (e.g., `project_id` + `user_id`) as its primary key to ensure that combination is unique (e.g., a user can only be part of a project once). |                                                                                                            |
 
 VII. Querying and Security
 
@@ -714,7 +724,7 @@ B. Querying Multiple Tables with Joins
 
 • **JOIN** **(Inner Join):** Returns rows only if there are **matching entries in both tables**.
 
-• **LEFT JOIN****:** Returns all rows from the left table (first table listed) and the matching rows from the right table. If no match exists, it returns `NULL` values for the right table's fields. This is used when you need the data from the primary table regardless of whether the related data exists (e.g., fetching user data even if they lack a profile entry).
+• **LEFT JOIN\*\***:\*\* Returns all rows from the left table (first table listed) and the matching rows from the right table. If no match exists, it returns `NULL` values for the right table's fields. This is used when you need the data from the primary table regardless of whether the related data exists (e.g., fetching user data even if they lack a profile entry).
 
 C. Parameterized Queries and SQL Injection Defense
 
@@ -748,11 +758,11 @@ Indexing is a feature that drastically improves query performance by avoiding se
 
 • **When to Index:** Indexing is crucial for any field frequently used in three scenarios:
 
-    1. **Join Conditions:** Fields used to link tables (e.g., foreign keys like `project_id` in the `tasks` table).
+1. **Join Conditions:** Fields used to link tables (e.g., foreign keys like `project_id` in the `tasks` table).
 
-    2. **WHERE** **Clauses:** Fields used for filtering (e.g., `status`).
+2. **WHERE** **Clauses:** Fields used for filtering (e.g., `status`).
 
-    3. **Sort Conditions:** Fields used for ordering results (e.g., `created_at` in descending order).
+3. **Sort Conditions:** Fields used for ordering results (e.g., `created_at` in descending order).
 
 • **Trade-off:** Maintaining an index requires the database to perform an overhead operation on every insert or update to keep the index lookup table current. This overhead must be evaluated against the performance gain in query speed. Primary key fields are indexed automatically by default.
 
@@ -773,16 +783,16 @@ Caching is a fundamental mechanism used to enhance the performance and efficienc
 - **Technical Definition:** Caching involves keeping a **subset** of primary data in a location that is **faster and easier to access**. The selection of this subset depends on parameters like frequency of use and probability of next use.
 - **Impact:** Caching is a huge factor in high-performance applications that need to track latency in two-digit microseconds or milliseconds.
 - **Key Scenarios for Caching:** Caching is typically resorted to in two common scenarios where developers want to avoid:
-    1. **Heavy Computation:** Avoiding running resource-intensive algorithms repeatedly (e.g., ranking algorithms).
-    2. **Sending Large Amounts of Data:** Avoiding transferring huge payloads repeatedly (e.g., video files).
+  1. **Heavy Computation:** Avoiding running resource-intensive algorithms repeatedly (e.g., ranking algorithms).
+  2. **Sending Large Amounts of Data:** Avoiding transferring huge payloads repeatedly (e.g., video files).
 
 ### II. Real-World Examples
 
-|Platform|Challenge|Caching Solution and Mechanism|
-|:--|:--|:--|
-|**Google Search**|Search queries (like "what is the weather today") are searched millions of times, requiring expensive re-computation involving crawling, indexing, and ranking of billions of web pages.|Google uses a **distributed in-memory caching system** spread across the world. If a query result is found in the cache (**cache hit**), it returns instantly, avoiding the need to recompute results and lowering server load. If the data is not found (**cache miss**), it is computed and then cached for subsequent use.|
-|**Netflix**|Delivering hundreds and thousands of terabytes of content (movies, series) to millions of global users with minimal buffering.|Netflix uses **CDN (Content Delivery Network)**, which serves content from **Edge locations/servers** that are geographically closer to the end users. This minimizes latency compared to accessing the originating server, which might be in the US. Netflix caches a **subset** of its content based on algorithms (like trend analysis) to optimize cost and resources.|
-|**X (Twitter)**|Identifying trending topics requires analyzing billions of tweets in real-time, involving expensive machine learning and GPU-intensive computations.|To avoid repeating this computation for every user accessing the trending section, Twitter **caches** the results. Since trends typically remain stable for hours or days, caching is safe. This data is stored in an **in-memory key-value store** like Redis.|
+| Platform          | Challenge                                                                                                                                                                                | Caching Solution and Mechanism                                                                                                                                                                                                                                                                                                                                             |
+| :---------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Google Search** | Search queries (like "what is the weather today") are searched millions of times, requiring expensive re-computation involving crawling, indexing, and ranking of billions of web pages. | Google uses a **distributed in-memory caching system** spread across the world. If a query result is found in the cache (**cache hit**), it returns instantly, avoiding the need to recompute results and lowering server load. If the data is not found (**cache miss**), it is computed and then cached for subsequent use.                                              |
+| **Netflix**       | Delivering hundreds and thousands of terabytes of content (movies, series) to millions of global users with minimal buffering.                                                           | Netflix uses **CDN (Content Delivery Network)**, which serves content from **Edge locations/servers** that are geographically closer to the end users. This minimizes latency compared to accessing the originating server, which might be in the US. Netflix caches a **subset** of its content based on algorithms (like trend analysis) to optimize cost and resources. |
+| **X (Twitter)**   | Identifying trending topics requires analyzing billions of tweets in real-time, involving expensive machine learning and GPU-intensive computations.                                     | To avoid repeating this computation for every user accessing the trending section, Twitter **caches** the results. Since trends typically remain stable for hours or days, caching is safe. This data is stored in an **in-memory key-value store** like Redis.                                                                                                            |
 
 ### III. Levels of Caching in Backend Engineering
 
@@ -799,11 +809,11 @@ As a backend engineer, you will most frequently encounter three levels of cachin
 CDNs cache content on geographically distributed servers, often called **Edge nodes** or **Edge servers**, to minimize latency for users in that region.
 
 - **Workflow:**
-    1. User enters a URL, triggering a DNS query to resolve the domain name.
-    2. The CDN DNS system routes the request to the nearest **POP (Point of Presence)**, which is a concentration of multiple Edge servers. Routing considers the user’s geographic location and network conditions (e.g., routing users with slow connections to POPs holding lower-quality video versions).
-    3. The Edge server checks its cache.
-    4. If a **Cache Hit** occurs, the content is returned instantly.
-    5. If a **Cache Miss** occurs, the Edge server fetches the content from the centralized **originating server**.
+  1. User enters a URL, triggering a DNS query to resolve the domain name.
+  2. The CDN DNS system routes the request to the nearest **POP (Point of Presence)**, which is a concentration of multiple Edge servers. Routing considers the user’s geographic location and network conditions (e.g., routing users with slow connections to POPs holding lower-quality video versions).
+  3. The Edge server checks its cache.
+  4. If a **Cache Hit** occurs, the content is returned instantly.
+  5. If a **Cache Miss** occurs, the Edge server fetches the content from the centralized **originating server**.
 - **Time To Live (TTL):** CDNs use TTL to define how long content should remain cached. When TTL expires, the next request will trigger a fetch of fresh content from the originating server.
 
 #### B. DNS Query Caching
@@ -811,17 +821,17 @@ CDNs cache content on geographically distributed servers, often called **Edge no
 The DNS (Domain Name System) process relies heavily on caching to minimize the work required to recursively find the IP address corresponding to a domain name.
 
 - **DNS Resolution Hierarchy:** When a user enters a domain (`example.com`), the resolution path involves checking multiple caches and escalating the query:
-    1. **User Device/OS Cache:** The operating system (Windows, Mac, Linux) checks its local DNS cache first.
-    2. **Browser Cache:** If the OS misses, the modern web browser (Chrome, Firefox) checks its own DNS cache.
-    3. **Recursive Resolver Cache:** The query is sent to the recursive resolver (provided by the ISP or a public DNS provider like Google DNS). This resolver maintains its own cache to avoid recursively querying root servers, TLD servers, and authoritative name servers repeatedly.
+  1. **User Device/OS Cache:** The operating system (Windows, Mac, Linux) checks its local DNS cache first.
+  2. **Browser Cache:** If the OS misses, the modern web browser (Chrome, Firefox) checks its own DNS cache.
+  3. **Recursive Resolver Cache:** The query is sent to the recursive resolver (provided by the ISP or a public DNS provider like Google DNS). This resolver maintains its own cache to avoid recursively querying root servers, TLD servers, and authoritative name servers repeatedly.
 
 ### V. Hardware Level Caching and In-Memory Storage
 
 Caching is implemented at the hardware level (L1, L2, L3 caches) to speed up CPU-level operations by storing frequently accessed or predicted data.
 
 - **Primary vs. Secondary Storage:**
-    - **RAM (Random Access Memory) / Main Memory (Primary Storage):** Used by major caching technologies like Redis/Memcached because data access is very fast (due to electrical signal access to memory addresses). RAM offers **fast random access** time but has **limited capacity** and is **volatile** (data clears when power is off).
-    - **Hard Disk/SSDs (Secondary Storage):** Slower than RAM (often involving mechanical or complex operations) but offers **higher capacity** and **persistence** (data survives power loss).
+  - **RAM (Random Access Memory) / Main Memory (Primary Storage):** Used by major caching technologies like Redis/Memcached because data access is very fast (due to electrical signal access to memory addresses). RAM offers **fast random access** time but has **limited capacity** and is **volatile** (data clears when power is off).
+  - **Hard Disk/SSDs (Secondary Storage):** Slower than RAM (often involving mechanical or complex operations) but offers **higher capacity** and **persistence** (data survives power loss).
 - **In-Memory Database Persistence:** Technologies like Redis use RAM for high-speed data access but implement mechanisms behind the scenes to leverage **secondary storage** (disk) for **persistence**. Data is loaded from disk into RAM when the program starts.
 
 ### VI. Software Caching: In-Memory Key-Value Stores
@@ -837,50 +847,55 @@ Technologies like **Redis** and **Memcached** are known as **in-memory key-value
 Backend engineers use different strategies to manage how data enters and is updated in the cache:
 
 1. **Lazy Caching (Cache Aside):**
-    
-    - The server checks the cache upon request.
-    - If there is a cache miss, the server fetches the data from the primary database, **stores it in the cache**, and then returns the result to the client.
-    - This is called "lazy" because data is cached only when it is actually requested.
+
+   - The server checks the cache upon request.
+   - If there is a cache miss, the server fetches the data from the primary database, **stores it in the cache**, and then returns the result to the client.
+   - This is called "lazy" because data is cached only when it is actually requested.
+
 2. **Write-Through Caching:**
-    
-    - This is an update strategy where a database change (e.g., POST, PUT, PATCH call) is simultaneously applied to both the **primary database and the cache** within the same execution flow.
-    - **Advantage:** The cache is always fresh, as it is updated instantly.
-    - **Disadvantage:** Introduces overhead to the write operation, as two separate updates must occur.
+
+   - This is an update strategy where a database change (e.g., POST, PUT, PATCH call) is simultaneously applied to both the **primary database and the cache** within the same execution flow.
+   - **Advantage:** The cache is always fresh, as it is updated instantly.
+   - **Disadvantage:** Introduces overhead to the write operation, as two separate updates must occur.
 
 ### VIII. Eviction Policies
 
 Due to the limited capacity of primary memory, eviction policies determine which data must be deleted from the cache when it becomes full, making space for new, high-priority data.
 
-|Policy|Mechanism|Description|
-|:--|:--|:--|
-|**No Eviction**|No policy is configured.|Insertion fails with a memory-full error when capacity is reached.|
-|**LRU (Least Recently Used)**|Tracks the last access time of each key.|Deletes the data point that was **accessed the longest time ago**.|
-|**LFU (Least Frequently Used)**|Tracks the frequency of access for each key.|Deletes the data point that has been **accessed the least number of times** so far.|
-|**TTL (Time to Live) Based**|Uses the configured expiration time of keys.|Selects the key that is scheduled to **expire soonest** to remove from the cache.|
+| Policy                          | Mechanism                                    | Description                                                                         |
+| :------------------------------ | :------------------------------------------- | :---------------------------------------------------------------------------------- |
+| **No Eviction**                 | No policy is configured.                     | Insertion fails with a memory-full error when capacity is reached.                  |
+| **LRU (Least Recently Used)**   | Tracks the last access time of each key.     | Deletes the data point that was **accessed the longest time ago**.                  |
+| **LFU (Least Frequently Used)** | Tracks the frequency of access for each key. | Deletes the data point that has been **accessed the least number of times** so far. |
+| **TTL (Time to Live) Based**    | Uses the configured expiration time of keys. | Selects the key that is scheduled to **expire soonest** to remove from the cache.   |
 
 ### IX. Backend Use Cases for In-Memory Caches
 
 Backend engineers frequently use in-memory databases like Redis for specific, performance-critical tasks:
 
 1. **Database Query Caching:**
-    
-    - Caching the results of **compute-intensive database queries** (e.g., heavy joins, complex aggregations) that are frequently executed (e.g., dashboard or landing page APIs).
-    - This reduces the latency of the API call and significantly decreases the load on the primary relational database.
-    - It is most effective for **read-heavy operations** where the underlying data changes infrequently (e.g., caching static product details or user profile information).
+
+   - Caching the results of **compute-intensive database queries** (e.g., heavy joins, complex aggregations) that are frequently executed (e.g., dashboard or landing page APIs).
+   - This reduces the latency of the API call and significantly decreases the load on the primary relational database.
+   - It is most effective for **read-heavy operations** where the underlying data changes infrequently (e.g., caching static product details or user profile information).
+
 2. **Session Storing:**
-    
-    - Storing authentication-related session tokens for users after successful login.
-    - Since data retrieval from Redis is much faster than from disk-based databases, storing sessions in memory avoids latency in subsequent API calls and reduces constant load on the database.
+
+   - Storing authentication-related session tokens for users after successful login.
+   - Since data retrieval from Redis is much faster than from disk-based databases, storing sessions in memory avoids latency in subsequent API calls and reduces constant load on the database.
+
 3. **External API Caching:**
-    
-    - Caching responses from external services (e.g., weather APIs) with a defined TTL (e.g., one hour).
-    - This prevents the server from making repeated requests to the external API, thereby decreasing billing costs and avoiding rate limit constraints, especially for data that is not real-time.
+
+   - Caching responses from external services (e.g., weather APIs) with a defined TTL (e.g., one hour).
+   - This prevents the server from making repeated requests to the external API, thereby decreasing billing costs and avoiding rate limit constraints, especially for data that is not real-time.
+
 4. **Rate Limiting Mechanism:**
-    
-    - Rate limiting is typically implemented in a **middleware** before the main route/controller logic.
-    - The middleware identifies the client's public IP (often using the `X-Forwarded-For` header) and uses an in-memory cache to maintain a **counter** for that IP within a time window (e.g., 50 requests per minute).
-    - Storing this counter in Redis is essential because storing it in a relational database would require a database call for _every_ incoming request, significantly increasing latency and flooding the database.
-    - If the counter exceeds the limit, the request is blocked, and a **429 Too Many Requests** status code is returned.
+
+   - Rate limiting is typically implemented in a **middleware** before the main route/controller logic.
+   - The middleware identifies the client's public IP (often using the `X-Forwarded-For` header) and uses an in-memory cache to maintain a **counter** for that IP within a time window (e.g., 50 requests per minute).
+   - Storing this counter in Redis is essential because storing it in a relational database would require a database call for _every_ incoming request, significantly increasing latency and flooding the database.
+   - If the counter exceeds the limit, the request is blocked, and a **429 Too Many Requests** status code is returned.
+
 ## Detailed Notes: Task Queues and Background Jobs
 
 ### I. Definition and Core Concept
@@ -895,13 +910,13 @@ A **background task** or **background job** is any piece of code or logic that r
 
 Backend developers use background jobs to build **scalable and responsive applications**.
 
-|Advantage|Explanation|Source|
-|:--|:--|:--|
-|**Responsiveness**|The actual API call remains responsive because it is not blocked by heavy processing or dependency on external services.||
-|**User Experience (UX)**|Significantly improves UX by providing an immediate success response instead of stalling the client while waiting for slow processes (like sending an email).||
-|**Timeouts Prevention**|Prevents API call timeouts caused by waiting for slow external services.||
-|**Retrying Mechanisms**|Offers features like **exponential backoff** to automatically retry failed tasks, which is crucial when dealing with unreliable external services.||
-|**Scalability**|Allows heavy computational tasks to be moved off the main application server.||
+| Advantage                | Explanation                                                                                                                                                   | Source |
+| :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----- |
+| **Responsiveness**       | The actual API call remains responsive because it is not blocked by heavy processing or dependency on external services.                                      |        |
+| **User Experience (UX)** | Significantly improves UX by providing an immediate success response instead of stalling the client while waiting for slow processes (like sending an email). |        |
+| **Timeouts Prevention**  | Prevents API call timeouts caused by waiting for slow external services.                                                                                      |        |
+| **Retrying Mechanisms**  | Offers features like **exponential backoff** to automatically retry failed tasks, which is crucial when dealing with unreliable external services.            |        |
+| **Scalability**          | Allows heavy computational tasks to be moved off the main application server.                                                                                 |        |
 
 ### III. The Core Workflow: Synchronous vs. Asynchronous
 
@@ -927,11 +942,11 @@ The server performs minimal processing and immediately queues the time-consuming
 
 The entire system relies on three distinct components:
 
-|Component|Role/Function|Description|Source|
-|:--|:--|:--|:--|
-|**Producer**|Application code (main backend)|Creates the task (with all necessary information) and pushes it into the queue (enqueuing).||
-|**Broker/Queue**|Temporary holding area/storage|Stores the tasks until a worker is ready to process them. This is usually managed by an underlying technology.||
-|**Consumer/Worker**|Separate process/program|Constantly monitors the queue, picks up tasks (dequeuing), and executes the handler code.||
+| Component           | Role/Function                   | Description                                                                                                    | Source |
+| :------------------ | :------------------------------ | :------------------------------------------------------------------------------------------------------------- | :----- |
+| **Producer**        | Application code (main backend) | Creates the task (with all necessary information) and pushes it into the queue (enqueuing).                    |        |
+| **Broker/Queue**    | Temporary holding area/storage  | Stores the tasks until a worker is ready to process them. This is usually managed by an underlying technology. |        |
+| **Consumer/Worker** | Separate process/program        | Constantly monitors the queue, picks up tasks (dequeuing), and executes the handler code.                      |        |
 
 **Underlying Technologies (Brokers):** The queue itself is often managed by specialized technologies, such as **RabbitMQ**, **Redis PubSub**, or managed cloud services like **Amazon SQS** (Simple Queue Service).
 
@@ -952,12 +967,12 @@ This concept addresses situations where a consumer crashes or hangs up while pro
 
 ### VI. Types of Background Tasks and Examples
 
-|Task Type|Description|Examples|Source|
-|:--|:--|:--|:--|
-|**One-Off Tasks**|A single execution triggered by a specific event in the request-response cycle.|Sending verification/welcome/password reset emails; sending a social media notification.||
-|**Recurring Tasks**|Tasks executed periodically at specific intervals.|Sending daily, weekly, or monthly reports; cleanup or maintenance jobs (e.g., deleting orphaned user sessions from the database).||
-|**Chain Tasks**|Tasks that have a **parent-child relationship** or hierarchy, where a task can only be triggered after the parent task successfully completes.|Video processing in an LMS: **1.** Encode video $\rightarrow$ **2.** Generate thumbnail $\rightarrow$ **3.** Process thumbnail images. (Tasks 2 and 3 depend on 1).||
-|**Batch Tasks**|A single event that triggers a large volume of actions or a long, complex process that cannot be run in the main thread.|The "Delete Account" API call (which triggers multiple sub-tasks to delete all related user entities and assets); sending thousands of reports to thousands of users simultaneously.||
+| Task Type           | Description                                                                                                                                    | Examples                                                                                                                                                                             | Source |
+| :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----- |
+| **One-Off Tasks**   | A single execution triggered by a specific event in the request-response cycle.                                                                | Sending verification/welcome/password reset emails; sending a social media notification.                                                                                             |        |
+| **Recurring Tasks** | Tasks executed periodically at specific intervals.                                                                                             | Sending daily, weekly, or monthly reports; cleanup or maintenance jobs (e.g., deleting orphaned user sessions from the database).                                                    |        |
+| **Chain Tasks**     | Tasks that have a **parent-child relationship** or hierarchy, where a task can only be triggered after the parent task successfully completes. | Video processing in an LMS: **1.** Encode video $\rightarrow$ **2.** Generate thumbnail $\rightarrow$ **3.** Process thumbnail images. (Tasks 2 and 3 depend on 1).                  |        |
+| **Batch Tasks**     | A single event that triggers a large volume of actions or a long, complex process that cannot be run in the main thread.                       | The "Delete Account" API call (which triggers multiple sub-tasks to delete all related user entities and assets); sending thousands of reports to thousands of users simultaneously. |        |
 
 **Major Use Cases for Offloading:**
 
@@ -1004,18 +1019,20 @@ A basic search in a relational database (like PostgreSQL) is written using the `
 As data grew to millions of products, this straightforward search became inadequate due to critical limitations:
 
 1. **Speed (Scalability Failure):**
-    
-    - A query that once took 50 milliseconds can slow down to 30 seconds.
-    - The database acts like a librarian who, to find a specific term (e.g., "machine learning"), must **look through every single book on every single shelf one by one**.
-    - The database has to **scan every single row**, examine every text field, and perform **pattern matching character by character**. This is **painfully slow** for large datasets.
+
+   - A query that once took 50 milliseconds can slow down to 30 seconds.
+   - The database acts like a librarian who, to find a specific term (e.g., "machine learning"), must **look through every single book on every single shelf one by one**.
+   - The database has to **scan every single row**, examine every text field, and perform **pattern matching character by character**. This is **painfully slow** for large datasets.
+
 2. **Relevance Failure:**
-    
-    - Relational databases have **no concept of relevance**.
-    - They might return a book where "machine learning" is in the title and a book where the term is only mentioned on the last page.
-    - The results are returned in a **random order**, with the most meaningful results potentially buried deep in the list (e.g., position 10,000).
+
+   - Relational databases have **no concept of relevance**.
+   - They might return a book where "machine learning" is in the title and a book where the term is only mentioned on the last page.
+   - The results are returned in a **random order**, with the most meaningful results potentially buried deep in the list (e.g., position 10,000).
+
 3. **Robustness (Typo Tolerance):**
-    
-    - Traditional search is not robust enough to handle common customer errors like typos (e.g., searching for "laptop" instead of "laptop").
+
+   - Traditional search is not robust enough to handle common customer errors like typos (e.g., searching for "laptop" instead of "laptop").
 
 ### II. The Solution: Inverted Index and Information Retrieval
 
@@ -1049,9 +1066,9 @@ Key parameters used in relevance scoring include:
 1. **Term Frequency:** How often a particular term appears in a **single document** (e.g., how often "machine" appears in the book). More frequent terms suggest higher relevance.
 2. **Document Frequency:** How common the term is **across all documents** in the index. Rarer terms often receive a higher relevance score than common terms (like "the" or "a").
 3. **Field Boosting:** Assigning higher relevance to a term based on the field in which it appears.
-    - If a term appears in the **title**, it is considered more relevant than if it appears in the **description**.
-    - If a term appears in the description, it is more relevant than if it appears only in the general **content**.
-    - Developers can define and alter their own field boosting criteria using the Elasticsearch DSL (JSON-based query language).
+   - If a term appears in the **title**, it is considered more relevant than if it appears in the **description**.
+   - If a term appears in the description, it is more relevant than if it appears only in the general **content**.
+   - Developers can define and alter their own field boosting criteria using the Elasticsearch DSL (JSON-based query language).
 4. **Document Length:** Checks how long the document is.
 
 #### B. Typo Tolerance
@@ -1062,10 +1079,10 @@ Full text search capabilities allow tools to derive from the context that a typo
 
 A demo comparing search performance on a table named `reviews` containing **50,000 records** highlighted the significant difference in speed:
 
-|Database Type|Search Mechanism|Query Example|Latency Observation|
-|:--|:--|:--|:--|
-|**PostgreSQL**|Traditional `ILIKE` with `%` symbols|`SELECT * FROM reviews WHERE review ILIKE '%search term%'`|Took **3 to 7.5 seconds** to return results for a specific query.|
-|**Elasticsearch**|Full Text Search (Query String search)|Searching against the `reviews` index|Took **500 milliseconds to 1 second** for the same query.|
+| Database Type     | Search Mechanism                       | Query Example                                              | Latency Observation                                               |
+| :---------------- | :------------------------------------- | :--------------------------------------------------------- | :---------------------------------------------------------------- |
+| **PostgreSQL**    | Traditional `ILIKE` with `%` symbols   | `SELECT * FROM reviews WHERE review ILIKE '%search term%'` | Took **3 to 7.5 seconds** to return results for a specific query. |
+| **Elasticsearch** | Full Text Search (Query String search) | Searching against the `reviews` index                      | Took **500 milliseconds to 1 second** for the same query.         |
 
 **Conclusion of Benchmark:** Even when matching the basic search criteria between the two (using lower case and wildcard matching), the time taken by the relational database was **significantly larger** than that of Elasticsearch.
 
@@ -1075,6 +1092,7 @@ A demo comparing search performance on a table named `reviews` containing **50,0
 - **Importance of Database Knowledge:** Knowledge of relational databases is **absolutely essential to master** for a backend engineer, as it involves almost 99% of the codebase.
 - **Elasticsearch Knowledge:** While highly valuable for search requirements, mastering Elasticsearch theory is **not mandatory** for all backend roles. Most common search use cases can be handled by using examples and snippets from documentation or LLMs, although optimization requires deeper knowledge.
 - **Deployment:** Elasticsearch stores entities in a JSON-like format called a **document** (similar to MongoDB). The index definition involves mapping fields; for example, `text` type allows full text matching, while `keyword` type means an exact match is desired.
+
 ---
 
 ## Detailed Notes: Error Handling and Building Fault Tolerant Systems
@@ -1100,7 +1118,6 @@ These errors can bring the entire system down due to heavy reliance on the datab
 | **Constraint Violations** | Attempting an operation that breaks database rules (e.g., trying to create a user with a unique email that already exists, or referencing a non-existent entry in a foreign key column). | Strengthen the application's **validation layer** to catch edge cases. |
 | **Query Errors**          | Malformed SQL (e.g., typos in query accessing tables that don't exist).                                                                                                                  | —                                                                      |
 | **Deadlocks**             | Multiple database operations create a **circular dependency** by waiting for each other.                                                                                                 | —                                                                      |
-
 
 #### C. External Service Errors
 
@@ -1193,8 +1210,8 @@ It is essential to control the details exposed in error messages to prevent secu
 1. **Avoid Leaking Internal Details:** Ensure the error handling logic does not expose **internal database details** (like table names, index names, or constraint definitions) to the consumer. This information can be used by malicious users to perform advanced attacks.
 2. **Generic Default Errors:** For unhandled internal errors (500s), always return a **generic message** like "Something went wrong" instead of the exact error message that bubbled up, as this usually contains sensitive internal details.
 3. **Authentication Secrecy:** Authentication modules are highly targeted.
-    - **Do not send detailed error messages** that confirm whether an email exists or if only the password was incorrect.
-    - For login failures (non-existent user or wrong password), always return a **generic message** like "**Invalid username or password**". This prevents attackers from performing step-by-step attacks to harvest valid user emails.
+   - **Do not send detailed error messages** that confirm whether an email exists or if only the password was incorrect.
+   - For login failures (non-existent user or wrong password), always return a **generic message** like "**Invalid username or password**". This prevents attackers from performing step-by-step attacks to harvest valid user emails.
 4. **Logging Sensitive Data:** **Never log sensitive user information** (passwords, credit card numbers, or API keys), even in internal server logs. In the case of errors, only log non-sensitive identifiers like the **user's ID** and a **correlation ID** to ensure enough context is available without compromising security.
 
 ---
@@ -1219,10 +1236,10 @@ Configuration management (CM) is the **systematic approach to organize, store, a
 Modern backend applications almost exclusively run as part of complex **distributed systems** (consisting of multiple services, databases, caches like Redis, message queues, and third-party integrations).
 
 - **Risk of Configuration Chaos:** If a systematic approach is not used to manage configuration, it leads to **configuration chaos**, which manifests as:
-    - Hard-coded values scattered throughout the codebase.
-    - Inconsistent behaviour across different environments.
-    - Security vulnerabilities due to exposed secrets.
-    - Nightmare debugging, as issues are hard to reproduce or trace back to a specific setting.
+  - Hard-coded values scattered throughout the codebase.
+  - Inconsistent behaviour across different environments.
+  - Security vulnerabilities due to exposed secrets.
+  - Nightmare debugging, as issues are hard to reproduce or trace back to a specific setting.
 - **High Stakes:** A misconfigured backend can cause severe damage, such as exposing customer data, processing payments incorrectly, or bringing down the entire platform.
 
 ### III. Types of Configuration
@@ -1240,38 +1257,37 @@ Configurations possess different characteristics; some are sensitive, some chang
 | **Business Rules**       | Logic-related rules enforced at the application level.                        | Maximum amount allowed for a user's order.                                                                                                              |
 | **Infra Config**         | DevOps-related configurations.                                                | —                                                                                                                                                       |
 
-
 ### IV. Sources and Storage Mechanisms
 
 The choice of storage for configurations depends on requirements for security, speed, and the environment.
 
 1. **Environment Variables:**
-    - The most common storage method across languages (Node.js, Python, Golang).
-    - In local environments, values are often stored in `.env` files and loaded into the operating system's environment using libraries.
-    - In containerized deployments (like Kubernetes), environment variables are fetched from secrets management services (e.g., Vault, Secret Manager) and loaded into the application environment before it starts.
+   - The most common storage method across languages (Node.js, Python, Golang).
+   - In local environments, values are often stored in `.env` files and loaded into the operating system's environment using libraries.
+   - In containerized deployments (like Kubernetes), environment variables are fetched from secrets management services (e.g., Vault, Secret Manager) and loaded into the application environment before it starts.
 2. **Files (YAML, JSON, TOML):**
-    - Used for non-secretive application settings.
-    - **YAML** is commonly preferred over JSON because it allows for comments, aiding knowledge sharing within teams.
+   - Used for non-secretive application settings.
+   - **YAML** is commonly preferred over JSON because it allows for comments, aiding knowledge sharing within teams.
 3. **Dedicated Tools and Key-Value Stores:**
-    - Simple key-value stores or tools like Consul.
+   - Simple key-value stores or tools like Consul.
 4. **Cloud Secrets Management Services:**
-    - Dedicated providers like **HashiCorp Vault**, AWS Parameter Store, Azure Key Vault, or Google Secret Manager.
-    - Recommended for large user traffic and distributed environments.
-    - These services **encrypt configurations** both when they are stored (at rest) and when they are transferred during fetching (in transit).
+   - Dedicated providers like **HashiCorp Vault**, AWS Parameter Store, Azure Key Vault, or Google Secret Manager.
+   - Recommended for large user traffic and distributed environments.
+   - These services **encrypt configurations** both when they are stored (at rest) and when they are transferred during fetching (in transit).
 5. **Hybrid Strategies:**
-    - Configurations can be fetched from multiple sources (e.g., AWS Parameter Store, a config YAML file, and environment variables).
-    - A **priority system** determines which source's value overrides others.
+   - Configurations can be fetched from multiple sources (e.g., AWS Parameter Store, a config YAML file, and environment variables).
+   - A **priority system** determines which source's value overrides others.
 
 ### V. Environment-Specific Configuration
 
 Configurations must be different across environments because each environment has different priorities and goals:
 
-|Environment|Primary Priority|Example Config Difference|
-|:--|:--|:--|
-|**Development** (Localhost)|**Developer productivity and debugging capabilities**.|Database connection pool size might be set low (e.g., 10).|
-|**Test**|**Automated validation and quality assurance**.|—|
-|**Staging**|To **mirror production functionality** for testing.|Configuration is usually minimal (e.g., pool size set to 2) to **minimise cloud costs**, even if it sacrifices some performance mirroring.|
-|**Production**|**Reliability, security, and performance**.|Database pool size is set high (e.g., 50) to handle large traffic spikes.|
+| Environment                 | Primary Priority                                       | Example Config Difference                                                                                                                  |
+| :-------------------------- | :----------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
+| **Development** (Localhost) | **Developer productivity and debugging capabilities**. | Database connection pool size might be set low (e.g., 10).                                                                                 |
+| **Test**                    | **Automated validation and quality assurance**.        | —                                                                                                                                          |
+| **Staging**                 | To **mirror production functionality** for testing.    | Configuration is usually minimal (e.g., pool size set to 2) to **minimise cloud costs**, even if it sacrifices some performance mirroring. |
+| **Production**              | **Reliability, security, and performance**.            | Database pool size is set high (e.g., 50) to handle large traffic spikes.                                                                  |
 
 ### VI. Security and Best Practices
 
@@ -1282,9 +1298,9 @@ Security must be the priority in configuration management.
 3. **Access Control (Principle of Least Privilege):** Strategise access control to ensure developers only have access to the configs strictly necessary for their role (e.g., DevOps teams access cloud instance configs, backend engineers access database configs).
 4. **Rotation:** Periodically rotate all sensitive configurations, including API keys and secrets, to mitigate the risk of leakage.
 5. **Mandatory Validation:**
-    - **Always validate all configurations** upon startup, regardless of their source (files, environment variables, secret managers).
-    - Validation ensures that mandatory variables are present and that they adhere to the required data types and formats.
-    - Failing to validate mandatory variables can cause the production system to break or behave strangely. It is a key strategy to prevent serious operational headaches.
+   - **Always validate all configurations** upon startup, regardless of their source (files, environment variables, secret managers).
+   - Validation ensures that mandatory variables are present and that they adhere to the required data types and formats.
+   - Failing to validate mandatory variables can cause the production system to break or behave strangely. It is a key strategy to prevent serious operational headaches.
 
 ---
 
@@ -1309,27 +1325,28 @@ Observability relies on three components, often referred to as pillars: Logs, Me
 Logging involves recording events along with **metadata** (e.g., user ID, request latency, function triggered) to provide context for debugging and understanding the system.
 
 1. **Logging Levels:** Logs are assigned specific levels to indicate context or severity:
-    
-    - **Debug:** Used during development/local troubleshooting when maximum detail is needed; often overwhelming and usually disabled in production.
-    - **Info:** Used for general application operations and successful business events (e.g., a successful creation operation).
-    - **Warn (Warning):** For events that are neither successful nor critical errors (e.g., user typing a wrong password during authentication).
-    - **Error:** Used for critical issues like validation errors or database query failures.
-    - **Fatal:** Indicates a very serious issue, typically resulting in the application shutting down and restarting.
+
+   - **Debug:** Used during development/local troubleshooting when maximum detail is needed; often overwhelming and usually disabled in production.
+   - **Info:** Used for general application operations and successful business events (e.g., a successful creation operation).
+   - **Warn (Warning):** For events that are neither successful nor critical errors (e.g., user typing a wrong password during authentication).
+   - **Error:** Used for critical issues like validation errors or database query failures.
+   - **Fatal:** Indicates a very serious issue, typically resulting in the application shutting down and restarting.
+
 2. **Structured vs. Unstructured Logs:** The format of logs varies based on the environment.
-    
-    - **Unstructured (Console Logs):** Logs are printed in a readable, plain text format, often with colors, to make it easier for humans to spot errors in a **development environment**.
-    - **Structured (JSON Logs):** Logs are printed in **JSON format** (the most popular structure) in **production systems**. This format is preferred because it makes it easy for log management tools (like ELK stack, Loki, Promtail, Grafana stack) to parse the data and extract valuable parameters like the user ID and request ID.
+
+   - **Unstructured (Console Logs):** Logs are printed in a readable, plain text format, often with colors, to make it easier for humans to spot errors in a **development environment**.
+   - **Structured (JSON Logs):** Logs are printed in **JSON format** (the most popular structure) in **production systems**. This format is preferred because it makes it easy for log management tools (like ELK stack, Loki, Promtail, Grafana stack) to parse the data and extract valuable parameters like the user ID and request ID.
 
 #### III. Monitoring and Metrics
 
 Monitoring is about continuously checking the health and performance of the system. It provides **real-time data** about the system's state, though typically with a short delay (e.g., 10 to 15 seconds) to avoid overwhelming the system.
 
 - **Metrics Examples:** Metrics are concrete numbers used to quantify system state, such as:
-    - Server CPU and memory usage.
-    - Request throughput (requests processed per second).
-    - Error rates (requests returning status codes greater than 200).
-    - Average transaction time.
-    - State of database connections (open pools).
+  - Server CPU and memory usage.
+  - Request throughput (requests processed per second).
+  - Error rates (requests returning status codes greater than 200).
+  - Average transaction time.
+  - State of database connections (open pools).
 
 #### IV. Traces and Instrumentation
 
@@ -1363,11 +1380,11 @@ Every application runs as a **process** on a server, which has a life cycle (bir
 
 #### II. Signal Types
 
-|Signal|Name|Description|Use Case|
-|:--|:--|:--|:--|
-|**`SIGTERM`**|Signal Terminate|A **polite request** from the OS to shut down, allowing the application time to finish existing tasks and clean up.|Used by deployment systems, process managers (PM2), and orchestration platforms (Kubernetes).|
-|**`SIGINT`**|Signal Interrupt|A **user-initiated shutdown**, typically triggered by pressing **Ctrl + C**.|Used primarily by developers in development environments. Should be handled identically to `SIGTERM`.|
-|**`SIGKILL`**|Signal Kill|The **kill command** or "nuclear option". It cannot be caught or ignored by the application.|Results in an **instant stop** with no opportunity for cleanup. Received if polite signals (`SIGTERM`/`SIGINT`) are ignored.|
+| Signal        | Name             | Description                                                                                                         | Use Case                                                                                                                     |
+| :------------ | :--------------- | :------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------- |
+| **`SIGTERM`** | Signal Terminate | A **polite request** from the OS to shut down, allowing the application time to finish existing tasks and clean up. | Used by deployment systems, process managers (PM2), and orchestration platforms (Kubernetes).                                |
+| **`SIGINT`**  | Signal Interrupt | A **user-initiated shutdown**, typically triggered by pressing **Ctrl + C**.                                        | Used primarily by developers in development environments. Should be handled identically to `SIGTERM`.                        |
+| **`SIGKILL`** | Signal Kill      | The **kill command** or "nuclear option". It cannot be caught or ignored by the application.                        | Results in an **instant stop** with no opportunity for cleanup. Received if polite signals (`SIGTERM`/`SIGINT`) are ignored. |
 
 #### III. The Graceful Shutdown Procedure
 
@@ -1378,18 +1395,18 @@ A graceful shutdown involves two major phases when a polite signal (`SIGTERM` or
 - **Stop New Connections:** The first step is to immediately **stop accepting new connections** or requests (like preventing new customers from entering a closing restaurant).
 - **Process In-Flight Requests:** Existing requests that are already being processed must be allowed to finish.
 - **Application-Specific Draining:** The implementation differs by architecture:
-    - **HTTP Servers (Backend):** Stop accepting new HTTP requests and allow existing requests to complete.
-    - **Database:** Finish all existing queries or transactions before closing the connection.
-    - **WebSockets:** Notify the client that the connection is closing before actually closing the socket.
+  - **HTTP Servers (Backend):** Stop accepting new HTTP requests and allow existing requests to complete.
+  - **Database:** Finish all existing queries or transactions before closing the connection.
+  - **WebSockets:** Notify the client that the connection is closing before actually closing the socket.
 - **Timeout Mechanism:** A **hard limit** (e.g., 30 or 60 seconds) is set as the maximum duration the system will wait for existing requests to complete. If the operations exceed this limit, the system is forcefully stopped. The timeout duration must be chosen carefully, based on the application’s typical request duration, to balance operational speed against the risk of interrupting legitimate operations.
 
 **2. Resource Cleanup** This involves releasing all system resources the application acquired during its execution.
 
 - **Resources to Clean:** This includes:
-    - **Network Connections:** Closing active TCP connections, especially those in the database connection pool.
-    - **Database Transactions:** Explicitly **committing or rolling back** transactions to avoid inconsistent states, deadlocks, or data corruption.
-    - **File Handles:** Releasing access handles to the file system that the OS provided.
-    - Temporary files and caches.
+  - **Network Connections:** Closing active TCP connections, especially those in the database connection pool.
+  - **Database Transactions:** Explicitly **committing or rolling back** transactions to avoid inconsistent states, deadlocks, or data corruption.
+  - **File Handles:** Releasing access handles to the file system that the OS provided.
+  - Temporary files and caches.
 - **Cleanup Order:** Resources should be cleaned up in the **reverse order of the way they were acquired**. This prevents dependent operations from failing because the resource they rely on (e.g., a Redis connection) was prematurely terminated.
 
 ---
@@ -1397,3 +1414,158 @@ A graceful shutdown involves two major phases when a polite signal (`SIGTERM` or
 **Analogy for Graceful Shutdown:**
 
 Implementing graceful shutdown is like a thoughtful guest leaving a dinner party. The host (the OS) gives a polite request (`SIGTERM`). The guest (the application) registers the request (`SIGTERM` Handler). They politely **decline new invitations** (Connection Draining). They finish their current conversations and meal (processing in-flight requests) within a strict time limit (Timeout). Finally, they **clean their plate and tidy up** (Resource Cleanup, closing database connections) before quietly leaving the house. If they slam the door and run off without saying goodbye (`SIGKILL`), things are left messy and corrupted.
+
+---
+
+Backend Scaling & Performance Engineering — Detailed Explanation
+These notes provide a comprehensive overview of backend scaling and performance engineering, based on the provided sources.
+
+---
+
+### **I. Understanding Performance Metrics**
+
+Performance is mathematically defined through specific measurable units rather than vague terms like "fast" or "slow".
+
+- **Latency:** The total time elapsed between a user interaction (like clicking a button) and the final rendering of elements on the screen.
+  - **Variability:** Latency is never a single fixed number; it varies between requests due to factors like **cache hits**, database query speeds, and whether the server is concurrently processing other requests.
+  - **Percentiles (P-values):** Averages are misleading in performance engineering because they hide outliers. Instead, engineers use percentiles:
+    - **P50:** 50% of users experience this latency or less.
+    - **P90:** 10% of users experience latency higher than this value.
+    - **P99:** The slowest 1% of users. This is critical because P99 requests often represent **complex business logic** or high-value customer workflows, such as making payments.
+- **Throughput:** This measures how many requests a system can handle in a given time period, typically expressed as **requests per second (RPS)** or requests per minute. Throughput and latency are connected; as throughput increases, latency eventually increases dramatically.
+
+### **II. Utilization and System Behavior**
+
+**Utilization** is the percentage of a system's total capacity currently in use.
+
+- **The Queue Effect:** As utilization increases, requests begin to form a queue. Even if the server works at the same speed, the "perceived" wait time for the user increases because they must wait for requests ahead of them to finish.
+- **Exponential Growth:** While it seems intuitive that latency would grow linearly with utilization, it actually grows **exponentially** as the system nears 100% utilization.
+- **Headroom:** Systems should never run at 100% capacity. Real-world traffic comes in **bursts**, so engineers typically maintain a buffer (e.g., 20% headroom) to absorb sudden traffic spikes without crashing the system.
+
+### **III. Identifying Bottlenecks**
+
+A **bottleneck** is the specific component in a system causing slowness.
+
+- **Measure, Don't Guess:** Engineers often waste time implementing "standard" solutions like caching or upgrading databases without knowing if those components are actually the problem.
+- **Profiling:** This involves measuring exactly where an application spends its time during runtime. **Flame Graphs** are used to visualise this data, showing which functions are the "widest" (take the most time).
+- **Distributed Tracing:** This records exactly when a request enters and leaves various components (e.g., business logic, database, external APIs), allowing engineers to pinpoint the culprit of high latency.
+
+### **IV. Database Performance Engineering**
+
+Databases are frequently the primary bottleneck because they handle the "hard work" of durable storage and consistency.
+
+- **N+1 Query Problem:** A common issue where an application fetches $N$ items and then executes $N$ separate queries to fetch details for each item. This creates massive overhead due to repeated network transmissions and database parsing. The solution is **bulk fetching** or using SQL **joins**.
+- **Indexing:** An index (typically a **B-tree**) maintains a sorted copy of column values to avoid slow **sequential scans** (looking at every row).
+  - **Cost of Indexes:** Indexes are not free; they require extra storage space and slow down **write operations** (insert, update, delete) because the index must be updated alongside the table.
+- **Connection Pooling:** Establishing a TCP connection is expensive due to the three-way handshake and authentication. A **connection pool** maintains a set of open, idle connections that the server can "borrow" and reuse, preventing the database from crashing during traffic spikes.
+
+### **V. Caching Strategies**
+
+Caching stores the results of expensive operations in a fast storage layer like **Redis**.
+
+- **Invalidation:** The hardest part of caching is keeping the cache in sync with the database.
+  - **Time-based (TTL):** Data expires after a set time.
+  - **Event-based:** The cache is explicitly deleted when the underlying data is updated.
+- **Patterns:**
+  - **Cache Aside:** The application checks the cache first; if it's a "miss," it fetches from the DB and updates the cache.
+  - **Write-Through:** Updates both the cache and DB simultaneously.
+  - **Write-Behind:** Updates the cache immediately and the DB asynchronously.
+
+### **VI. Scaling Strategies: Vertical vs. Horizontal**
+
+- **Vertical Scaling (Scaling Up):** Adding more power (CPU, RAM, SSD) to a single machine.
+  - **Pros:** Simple; no code changes required.
+  - **Cons:** Hardware has a "ceiling" (hard limit), and it creates a **single point of failure**.
+- **Horizontal Scaling (Scaling Out):** Adding more instances of the same server to work together.
+  - **Pros:** No hard limit on capacity, provides redundancy, and allows for **geographic distribution**.
+  - **Cons:** Significantly more complex; requires **load balancers** and synchronisation between distributed servers.
+
+---
+
+**Analogy for System Utilization:**
+Think of a **Highway**. At 50% capacity, traffic flows smoothly and cars can overtake easily. At 90% capacity, traffic becomes unpredictable; a single car braking causes a ripple effect of delays. At 100% capacity, the entire pathway is blocked and no one can move. Your backend behaves the same way; you need empty space (headroom) to keep the "traffic" of requests moving quickly.
+
+---
+
+These notes provide a thorough explanation of backend scaling and performance engineering based on the provided sources, focusing on horizontal scaling, load balancing, database strategies, and modern architectural paradigms.
+
+---
+
+### **I. Horizontal Scaling and the Statelessness Property**
+
+Horizontal scaling involves adding more machines of the same capacity to a system rather than increasing the power of a single machine,.
+
+- **Statelessness:** This is the key enabler for horizontal scaling,. It means that no individual server instance should hold data or information exclusive to itself.
+- **Centralized State:** Any data that needs to persist must live outside the individual servers in a centralized location accessible by all instances.
+  - **Sessions:** Instead of storing session information in a server's local memory—which leads to "401 Unauthorized" errors if a subsequent request hits a different server—it should be stored in a centralized in-memory database like **Redis**,,.
+  - **Files:** User-uploaded files should be stored in **object storage** (e.g., S3 or Cloudflare R2) rather than a server's local SSD,.
+  - **Databases:** Applications should use centralized databases (e.g., Postgres, RDS) rather than local file-based databases like SQLite,.
+
+### **II. Load Balancers (LB)**
+
+A load balancer is a mandatory "middleman" in horizontal scaling that receives all client requests and forwards them to specific server instances based on defined logic,,.
+
+#### **A. Load Balancing Algorithms**
+
+1.  **Round Robin:** Requests are sent in a rotating order (A $\rightarrow$ B $\rightarrow$ C),. This works best when requests have similar "costs" and servers have equal capacity.
+2.  **Weighted Round Robin:** A variation where higher-capacity servers (e.g., more RAM/CPU) are configured to receive a higher proportion of traffic,.
+3.  **Least Connections:** The LB tracks which server has the fewest active HTTP/TCP connections and routes new requests there,. This is smarter for "expensive" requests (e.g., heavy database writes or external API calls) that keep connections open longer,,.
+4.  **Other Algorithms:** These include **Least Response Time** (favoring faster servers) and **Resource-based** (routing based on current CPU/RAM usage),.
+
+#### **B. Health Checks**
+
+To prevent a crashed server from causing user errors (502/503), LBs perform health checks,,. The LB sends a simple test request (usually a `GET` endpoint) every second; if a server fails to return a 200-series response, it is blacklisted until it passes the test again,,.
+
+### **III. Database Scaling Strategies**
+
+Scaling databases is tricky because they are inherently stateful and must maintain data consistency across instances,.
+
+- **Read Replicas:** A "Primary" (Master) instance handles all write operations (Insert/Update/Delete), while multiple "Replica" instances handle read-only queries (Select),.
+  - **Benefits:** Reduces load on the primary DB and lowers latency for global users by placing replicas in different geographic regions.
+  - **Replication Lag:** Because of the physical distance between servers (the "physics cap"), it may take 200–300ms for data to travel from the Primary to a Replica,. This can lead to **consistency issues** where a user refreshes a page immediately after a write and sees outdated data,,.
+- **Sharding (Partitioning):** This involves physically dividing a massive table (e.g., billions of rows) into separate database instances based on a **sharding key** (e.g., date ranges or User IDs),,. This reduces query latency by decreasing the volume of rows each instance must search.
+- **Distributed Databases:** Modern "serverless" or distributed databases (e.g., Neon, PlanetScale, CockroachDB) handle the complexities of sharding and replication automatically,.
+
+### **IV. Content Delivery Networks (CDNs) and Edge Computing**
+
+CDNs solve the geographical gap between users and servers caused by the finite speed of light in fiber optic cables,.
+
+1.  **Edge Locations:** CDNs use "Points of Presence" (POPs) to cache content physically closer to the user (e.g., Tokyo vs. US), reducing round-trip latency from 100ms to 2–3ms.
+2.  **Cacheable Content:** CDNs typically store **static content** (JS, CSS, HTML, images) but can also cache **API responses** for data that doesn't change frequently,.
+3.  **Security:** CDNs like Cloudflare protect servers from **DDoS attacks** by distributing malicious traffic across their massive global network,,.
+4.  **Edge Computing:** Modern CDNs (e.g., Cloudflare Workers) allow for **processing at the edge node**,. This is ideal for low-latency tasks like authentication, localization, or request routing, though it faces resource constraints like limited RAM and specialized runtimes (e.g., V8 isolates),,.
+
+### **V. Asynchronous Processing**
+
+To reduce perceived latency, time-consuming tasks should be offloaded from the main request-response cycle,.
+
+- **Workflow:** The server (Producer) performs immediate logic, pushes a "task" into a **Queue** (e.g., Redis or RabbitMQ), and returns a success response to the user,,. A separate **Worker** (Consumer) then picks up and executes the task,.
+- **Use Cases:** Sending emails, video encoding, image resizing, and complex "Delete Account" operations that involve removing millions of rows across multiple tables,,,.
+
+### **VI. Microservices vs. Monoliths**
+
+- **Monoliths:** A single deployable unit where all code lives together. They are easier to develop, test, and deploy.
+- **Microservices:** Independent services that communicate over a network (HTTP/gRPC),.
+  - **When to use:** They are primarily for **scaling teams** (100+ developers) or when different modules have wildly different scaling needs or technology requirements (e.g., Node for parsing vs. Go/Rust for image processing),,,.
+  - **Trade-offs:** Increased complexity in networking, debugging (requires distributed tracing), and maintaining data consistency,.
+
+### **VII. Serverless Computing (FaaS)**
+
+Serverless allows developers to focus on code (functions) and events rather than managing virtual machines or operating systems,.
+
+- **Benefits:** Solves the problem of capacity planning (over-provisioning/under-provisioning) and follows a "pay-as-you-go" pricing model based on actual execution time,.
+- **Drawbacks:**
+  - **Cold Starts:** The time taken to spin up a new instance upon the first request,.
+  - **Execution Limits:** Functions usually have a maximum runtime (e.g., 15 minutes),.
+  - **Statelessness:** Traditional stateful behaviors like persistent TCP or WebSocket connections must be reimagined,.
+
+### **VIII. General Thumb Rules for Engineering**
+
+1.  **Measure First:** Always use **observability** (logs, metrics, traces) to identify the specific bottleneck before attempting a solution,,.
+2.  **Avoid Premature Optimization:** Do not implement complex solutions (like microservices or sharding) unless simplicity is genuinely insufficient,.
+3.  **Simple is Better:** A monolith is simpler than microservices; vertical scaling is simpler than horizontal scaling; and proper indexing is simpler than adding a cache layer,.
+
+---
+
+**Analogy for System Scaling:**
+Think of a **Post Office**. **Vertical scaling** is like hiring one "super-clerk" who can move faster, but eventually, they hit a physical limit. **Horizontal scaling** is opening more service windows. The **Load Balancer** is the manager standing at the door directing people to the shortest line (**Least Connections**) or just the next available window (**Round Robin**). **Asynchronous processing** is like a "Drop Box" where you leave a package; the clerk doesn't process it while you stand there, but they promise to do it by the end of the day, allowing you to leave immediately.
