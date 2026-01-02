@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
 dotenv.config();
-
+import { app } from "./app.js";
 import ConnectDB from "./db/index.js";
 ConnectDB()
   .then(() => {
     try {
-      const port = process.env.PORT || 8000;
+      const port = process.env.PORT || 3000;
       app.listen(port, () => {
         console.log(`Server is runnig at ${port}`);
       });
@@ -17,8 +17,6 @@ ConnectDB()
     console.log("MongoDB Connect Fail", error);
   });
 
-// import express from "express";
-// const app = express();
 // (async () => {
 //   try {
 //     await mongoose.connect(`${process.env.MONOGODB_URL}`);
