@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { registerUser } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+
 const router = Router();
-router.post(
-  "/register",
+
+router.route("/register").post(
   upload.fields([
     {
       name: "avatar",
@@ -17,5 +17,4 @@ router.post(
   ]),
   registerUser
 );
-
 export default router;

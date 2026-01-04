@@ -17,10 +17,12 @@ const registerUser = asyncHandler(async (req, res) => {
   const { fullName, email, password, userName } = req.body;
   console.log(req.body);
 
-  if ([fullName, email, userName, password].some(() => field?.trim() === "")) {
+  if (
+    [fullName, email, userName, password].some((field) => field?.trim() === "")
+  ) {
     throw new ApiError(400, "All the details are required");
   }
-  const existedUser = User.findOne({
+  const existedUser = await User.findOne({
     $or: [{ userName }, { email }],
   });
   console.log(existedUser);
@@ -43,11 +45,10 @@ const registerUser = asyncHandler(async (req, res) => {
   const user = await User.create({
     fullName,
     avatar: avatar.url,
-    userName,
     email,
     coverImage: coverImage?.url || "",
     password,
-    username: userName.toLowerCase(),
+    userName: userName.toLowerCase(),
   });
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
