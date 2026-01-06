@@ -7,7 +7,7 @@ ConnectDB()
     try {
       const port = process.env.PORT || 3000;
       app.listen(port, () => {
-        console.log(`Server is runnig at ${port}`);
+        console.log(`Server is running at ${port}`);
       });
     } catch (error) {
       console.log("App didn't listen", error);
