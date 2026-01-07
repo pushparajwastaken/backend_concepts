@@ -3,6 +3,7 @@ import { ApiError } from "..//utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
+import cloudinary from "cloudinary";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -280,6 +281,30 @@ const coverImageUpdate = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, user, "Cover Image Updated Successfully"));
+});
+const deleteAvatar = asyncHandler(async (req, res) => {
+  const user = req.user;
+  if (!user.avatar) {
+    throw new ApiError(400, "Avatar file missing");
+  }
+  const publicId = user.avatar.split("/").slice(-2).join("/").split(",")[0];
+  await cloudinary.v2.uploader.destroy(publicId);
+  user.avatar = null;
+  await user.save({ validateBeforeSave: false });
+
+  return res.status(200).json(new ApiResponse(200, {}, "Avatar Deleted"));
+});
+const deleteCoverImage = asyncHandler(async (req, res) => {
+  const user = req.user;
+  if (!user.coverImage) {
+    throw new ApiError(400, "Cover Image file missing");
+  }
+  const publicId = user.coverImage.split("/").slice(-2).join("/").split(",")[0];
+  await cloudinary.v2.uploader.destroy(publicId);
+  user.coverImage = null;
+  await user.save({ validateBeforeSave: false });
+
+  return res.status(200).json(new ApiResponse(200, {}, "coverImage Deleted"));
 });
 export {
   registerUser,
