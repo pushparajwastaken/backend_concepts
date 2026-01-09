@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import cloudinary from "cloudinary";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { channel } from "diagnostics_channel";
+import mongoose from "mongoose";
 const generateAccessAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -373,8 +374,33 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
       new ApiResponse(200, Channel[0], "User channel fetched Successfully")
     );
 });
+const getUserWatchHistory = asyncHandler(async (req, res) => {
+  const user = await User.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(req.user._id),
+      },
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "watchHistory",
+        foreignField: "_id",
+        as: "watchHistory",
+        pipeline: [
+          {
+            $lookup: {
+              from: "users",
+            },
+          },
+        ],
+      },
+    },
+  ]);
+});
 export {
   getUserChannelProfile,
+  getUserWatchHistory,
   deleteAvatar,
   registerUser,
   deleteCoverImage,
