@@ -178,17 +178,17 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       await generateAccessAndRefreshToken(user._id);
     return res
       .status(200)
-      .cookie("Access Token", accessToken, options)
-      .cookie("Refresh Token", newRefreshToken, options)
+      .cookie("refreshToken", newRefreshToken, options)
+      .cookie("accessToken", accessToken, options)
       .json(
         new ApiResponse(
           200,
-          { accessToken, refreshToken: newRefreshToken },
+          { refreshToken: newRefreshToken, accessToken },
           "Refresh Token Refreshed Successfully"
         )
       );
   } catch (error) {
-    throw new ApiError(400, "Invalid Refresh Token");
+    throw new ApiError(401, error?.message || "Invalid Refresh Token");
   }
 });
 const ChangeCurrentPassword = asyncHandler(async (req, res) => {
