@@ -26,7 +26,7 @@ const createTweet = asyncHandler(async (req, res) => {
     }
     return res
       .status(200)
-      .json(new ApiResponse(200, createTweet, "Tweet Created Successfully"));
+      .json(new ApiResponse(200, { tweet }, "Tweet Created Successfully"));
   } catch (error) {
     console.log(error?.message || "Somethig went wrong while creating tweet");
   }
@@ -50,11 +50,11 @@ const updateTweet = asyncHandler(async (req, res) => {
   if (!content || content.trim() == "") {
     throw new ApiError(404, "Content is required");
   }
-  const tweet = Tweet.findById(tweetId);
+  const tweet = await Tweet.findById(tweetId);
   if (!tweet) {
     throw new ApiError(404, "Tweet Not Found");
   }
-  if (tweet.owner.toString() !== req.user._id.toString()) {
+  if (!tweet.owner.equals(req.user._id)) {
     throw new ApiError(403, "Not allowed to update this tweet");
   }
   tweet.content = content.trim();
@@ -70,7 +70,7 @@ const deleteTweet = asyncHandler(async (req, res) => {
   if (!tweet) {
     throw new ApiError(404, "Tweet doesn't exist");
   }
-  if (tweet.owner.toString() !== req.user._id.toString()) {
+  if (!tweet.owner.equals(req.user._id)) {
     throw new ApiError(403, "Not Authorised to delete the tweet");
   }
   await Tweet.deleteOne({ _id: tweetId });
