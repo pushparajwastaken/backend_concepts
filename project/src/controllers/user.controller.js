@@ -5,7 +5,7 @@ import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import cloudinary from "cloudinary";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import { channel } from "diagnostics_channel";
+
 import mongoose from "mongoose";
 const generateAccessAndRefreshToken = async (userId) => {
   try {
