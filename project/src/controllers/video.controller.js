@@ -25,6 +25,44 @@ const getAllVideos = asyncHandler(async (req, res) => {
   const filter = {
     isPublished: true,
   };
+  if (query) {
+    filter.$or = [
+      { title: { $regex: query, $options: "i" } },
+      { description: { $regex: query, $options: "i" } },
+    ];
+  }
+  if (userId) {
+    filter.owner = userId;
+  }
+  const sortOptions = {
+    [sortBy]: sortType === "asc" ? 1 : -1,
+  };
+  const videos = await Video.find(filter)
+    .sort(sortOptions)
+    .skip(skip)
+    .limit(limitNumber)
+    .select("-isPublished")
+    .populate("owner", "userName avatar")
+    .lean();
+
+  const totalVideos = await Video.countDocuments(filter);
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        videos,
+        pagination: {
+          totalVideos,
+          page: pageNumber,
+          limit: limitNumber,
+          totalPages: Math.ceil(totalVideos / limitNumber),
+          hasNextPage: skip + videos.length < totalVideos,
+        },
+      },
+      "Videos fetched successfully"
+    )
+  );
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
